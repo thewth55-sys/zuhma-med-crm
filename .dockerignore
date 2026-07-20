@@ -1,0 +1,47 @@
+# Build outputs and caches
+.next
+out
+build
+.cache
+
+# Dependencies
+node_modules
+
+# Git repository
+.git
+.github
+
+# Environment files and secrets
+.env
+.env.local
+.env.development.local
+.env.production.local
+.env.test.local
+.env.staging
+
+# Debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Docker files
+Dockerfile
+.dockerignore
+docker-compose*.yml
+
+# Other development configurations
+.vscode
+.idea
+.editorconfig
+.prettierrc
+.prettierignore
+components.json
+AGENTS.md
+CLAUDE.md
+CHANGELOG.md
+CONTRIBUTING.md
+README.md
+docs
+supabase
+mcp-server
