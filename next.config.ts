@@ -59,14 +59,9 @@ const SECURITY_HEADERS = [
       // is Meta's JS SDK, loaded only on Settings → WhatsApp when
       // NEXT_PUBLIC_META_APP_ID is set (WhatsApp Embedded Signup —
       // see whatsapp-embedded-signup-button.tsx).
-      // unpkg.com serves the Lucide icon UMD bundle used by the
-      // public marketing landing (src/app/page.tsx), which renders
-      // outside the app's normal lucide-react import graph.
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://challenges.cloudflare.com https://connect.facebook.net https://unpkg.com",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://challenges.cloudflare.com https://connect.facebook.net",
       // Tailwind + inline style attributes on lots of components.
-      // fonts.googleapis.com serves the landing page's Google Fonts
-      // stylesheet (Manrope / JetBrains Mono).
-      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+      "style-src 'self' 'unsafe-inline'",
       // Supabase public-bucket avatars, contact avatars (arbitrary
       // https URLs paste-able from the UI), OG images, data URLs for
       // tiny inline assets.
@@ -74,9 +69,7 @@ const SECURITY_HEADERS = [
       // Outbound media previews (blob: from MediaRecorder + file picker)
       // and Supabase public-bucket audio/video the inbox renders.
       "media-src 'self' blob: https://*.supabase.co",
-      // fonts.gstatic.com serves the actual Manrope/JetBrains Mono
-      // font files referenced by the landing page's Google Fonts CSS.
-      "font-src 'self' data: https://fonts.gstatic.com",
+      "font-src 'self' data:",
       // Supabase REST + realtime (WSS). All Graph API calls (sending
       // messages, registering numbers, etc.) happen server-side, so
       // graph.facebook.com does not belong here — connect.facebook.net
@@ -90,11 +83,7 @@ const SECURITY_HEADERS = [
       // once NEXT_PUBLIC_SENTRY_DSN is set, but allowlisted
       // unconditionally so turning it on later doesn't also require
       // remembering to touch the CSP.
-      // ipwho.is / open.er-api.com back the /pricing page's
-      // local-currency estimate (src/lib/currency/geo-estimate.ts) —
-      // client-side, best-effort, display-only (billing always stays
-      // USD via Stripe).
-      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://www.googletagmanager.com https://www.google.com https://googleads.g.doubleclick.net https://challenges.cloudflare.com https://*.sentry.io https://*.ingest.sentry.io https://*.ingest.us.sentry.io https://*.ingest.de.sentry.io https://connect.facebook.net https://www.facebook.com https://graph.facebook.com https://ipwho.is https://open.er-api.com",
+      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://www.googletagmanager.com https://www.google.com https://googleads.g.doubleclick.net https://challenges.cloudflare.com https://*.sentry.io https://*.ingest.sentry.io https://*.ingest.us.sentry.io https://*.ingest.de.sentry.io https://connect.facebook.net https://www.facebook.com https://graph.facebook.com",
       // Turnstile renders its interactive challenge inside an iframe
       // from this origin when it can't pass invisibly; WhatsApp
       // Embedded Signup opens Meta's popup as a real window, not an
