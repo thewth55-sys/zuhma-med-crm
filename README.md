@@ -1,4 +1,4 @@
-# Zentro Med — CRM/EHR médico multi-tenant
+# Zuhma Med CRM — CRM/EHR médico multi-tenant
 
 > CRM/EHR para clínicas y consultorios médicos — bandeja de WhatsApp
 > compartida, pipeline de pacientes, agenda de doctores/consultorios,

@@ -105,11 +105,6 @@ const EDITABLE_ROLES: { value: AccountRole }[] = [
 // drift. The colour scale runs amber (owner — scarce, immutable) →
 // primary (admin) → muted (agent / viewer).
 
-// Plans with a configured seat-addon price — mirrors the `purchasable`
-// flag in lib/billing-platform/plans.ts (not imported here for the
-// same client-bundle-hygiene reason documented in signup/page.tsx).
-const SEATABLE_PLANS = new Set(['standalone', 'zentro_salud_starter', 'zentro_salud_pro']);
-
 function fmtDate(iso: string): string {
   // Match the rest of the dashboard's locale-light formatting.
   const d = new Date(iso);
@@ -132,7 +127,7 @@ function fmtExpiresIn(iso: string, t: (key: string, values?: Record<string, stri
 export function MembersTab() {
   const t = useTranslations('Settings.members');
   const tRoles = useTranslations('Settings.roles');
-  const { user, account, canManageMembers } = useAuth();
+  const { user, canManageMembers } = useAuth();
   const { getPresence, getRow, now } = usePresence();
 
   const [members, setMembers] = useState<Member[]>([]);
@@ -569,8 +564,6 @@ export function MembersTab() {
         open={inviteOpen}
         onOpenChange={setInviteOpen}
         onCreated={loadEverything}
-        atSeatLimit={account != null && members.length >= account.included_seats}
-        canAddPaidSeat={account != null && SEATABLE_PLANS.has(account.plan)}
       />
 
       <Dialog

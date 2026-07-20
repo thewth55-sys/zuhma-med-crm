@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 
-import { supabaseAdmin } from "@/lib/billing-platform/admin-client";
+import { supabaseAdmin } from "@/lib/supabase/admin-client";
 import { getPublicBookingConfig } from "@/lib/scheduling/public-booking";
 import { BookingWidget } from "@/components/public-booking/booking-widget";
 

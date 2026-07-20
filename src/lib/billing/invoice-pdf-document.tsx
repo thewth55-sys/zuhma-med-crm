@@ -7,7 +7,7 @@
 // ============================================================
 
 import { Document, Page, View, Text, Image } from "@react-pdf/renderer";
-import { createPdfStyles, fmtMoney, ZENTRO_GREEN, ZENTRO_GREEN_DARK } from "./pdf-theme";
+import { createPdfStyles, fmtMoney, ZUHMA_CORAL, ZUHMA_CORAL_DARK } from "./pdf-theme";
 
 export interface InvoicePdfLineItem {
   description: string;
@@ -50,12 +50,12 @@ const STATUS_LABEL: Record<string, string> = {
 };
 
 export function InvoicePdfDocument(props: InvoicePdfProps) {
-  const accent = props.accentColor || ZENTRO_GREEN;
+  const accent = props.accentColor || ZUHMA_CORAL;
   const balanceDue = Math.max(0, props.total - props.amountPaid);
   const styles = createPdfStyles(accent);
   const statusBg = balanceDue > 0 ? "#fef3c7" : "#d1fae5";
   const statusColor = balanceDue > 0 ? "#92400e" : "#065f46";
-  const balanceColor = balanceDue > 0 ? "#b45309" : ZENTRO_GREEN_DARK;
+  const balanceColor = balanceDue > 0 ? "#b45309" : ZUHMA_CORAL_DARK;
 
   return (
     <Document>

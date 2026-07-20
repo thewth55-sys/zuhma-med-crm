@@ -2,7 +2,7 @@
 // Webhook payload signing — pure, server-side.
 //
 // Every delivery carries an `X-Zentro-Signature` header so receivers
-// can verify the request really came from Zentro Med and wasn't tampered
+// can verify the request really came from Zuhma Med CRM and wasn't tampered
 // with or replayed. The scheme is Stripe-style:
 //
 //   X-Zentro-Signature: t=<unix_seconds>,v1=<hex HMAC-SHA256>
@@ -33,7 +33,7 @@ export function buildSignatureHeader(
 }
 
 /**
- * Verify a signature header. Exposed so a Zentro-Med-to-Zentro-Med integration
+ * Verify a signature header. Exposed so a Zuhma-Med-CRM-to-Zuhma-Med-CRM integration
  * (or a test) can validate deliveries; receivers in other stacks
  * reimplement the same three lines. `toleranceSeconds` bounds replay.
  */

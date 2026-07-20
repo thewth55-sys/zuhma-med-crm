@@ -103,7 +103,7 @@ export async function GET(request: Request) {
       )
     }
 
-    // Platform-wide default: with the shared "Zentro Labs runs one Meta
+    // Platform-wide default: with the shared "Zuhma runs one Meta
     // app, every client connects via Embedded Signup" model, the webhook
     // verify token never actually varies per account — it's configured
     // ONCE in Meta's dashboard for the one app everyone shares. Checking

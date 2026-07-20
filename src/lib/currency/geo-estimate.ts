@@ -16,7 +16,7 @@
  * perfectly fine fallback, never a broken page.
  */
 
-// Currencies for Zentro Med's actual target market (Spanish-speaking
+// Currencies for Zuhma Med CRM's actual target market (Spanish-speaking
 // Latin America) plus a handful of other common ones. Not exhaustive
 // ISO 4217 coverage on purpose — a country missing here just means no
 // local-currency line, which is a safe, silent fallback.

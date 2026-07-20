@@ -3,7 +3,7 @@
 // POST /api/v1/webhooks — register an endpoint    (scope: webhooks:manage)
 //
 // POST returns the signing `secret` in plaintext exactly once — store
-// it to verify the `X-Zentro-Signature` on deliveries. Zentro Med keeps only
+// it to verify the `X-Zentro-Signature` on deliveries. Zuhma Med CRM keeps only
 // an encrypted copy and can never show it again.
 // ============================================================
 

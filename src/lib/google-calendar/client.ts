@@ -6,13 +6,13 @@
 // endpoints (auth code exchange, token refresh, events.insert/patch/
 // delete, freeBusy.query) this integration actually needs.
 //
-// Sync direction: Zentro Med → Google Calendar is one-way (create/
+// Sync direction: Zuhma Med CRM → Google Calendar is one-way (create/
 // update/delete events on each connected calendar) — an edit made
-// directly in Google never flows back as a Zentro Med appointment.
+// directly in Google never flows back as a Zuhma Med CRM appointment.
 // The ONE read-back exception is getFreeBusy(): it checks whether a
 // connected doctor already has something on their Google Calendar at
 // a candidate appointment time, to warn staff before double-booking.
-// It never reads event details and never creates a Zentro Med record
+// It never reads event details and never creates a Zuhma Med CRM record
 // from what it finds — see appointment-editor-dialog.tsx.
 // ============================================================
 
@@ -40,7 +40,7 @@ function getEnv(name: string): string {
 }
 
 function redirectUri(): string {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/+$/, "") || "https://med.zentrolabs.com";
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/+$/, "") || "https://app.zuhma.com";
   return `${siteUrl}/api/google-calendar/callback`;
 }
 
@@ -219,7 +219,7 @@ export interface BusyPeriod {
  * Returns the busy intervals for `calendarId` within [timeMin,
  * timeMax), with no event details (titles/attendees/descriptions
  * aren't in the response at all, so there's nothing sensitive to
- * accidentally surface in the Zentro Med UI).
+ * accidentally surface in the Zuhma Med CRM UI).
  */
 export async function getFreeBusy(
   accessToken: string,

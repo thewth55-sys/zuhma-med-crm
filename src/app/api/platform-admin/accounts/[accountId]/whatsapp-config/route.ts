@@ -14,7 +14,7 @@ import { NextResponse } from "next/server";
 
 import { requirePlatformAdmin, logPlatformAdminAction, resolveAccountOwner } from "@/lib/auth/platform-admin";
 import { toErrorResponse } from "@/lib/auth/account";
-import { supabaseAdmin } from "@/lib/billing-platform/admin-client";
+import { supabaseAdmin } from "@/lib/supabase/admin-client";
 import { saveWhatsAppConfig } from "@/lib/whatsapp/save-config";
 import { checkRateLimit, rateLimitResponse, RATE_LIMITS } from "@/lib/rate-limit";
 

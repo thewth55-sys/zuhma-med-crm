@@ -147,23 +147,23 @@ html[data-mode="light"] {
 
 /* ---- ACCENT: primary color ---- */
 
-/* Zentro brand green — tokens converted straight from the hex values
- * in the Manual de Identidad (--green #4ADE5A / --forest-2 #1B5A2E).
- * Default theme so the app matches the Zentro Labs identity out of
- * the box; the other accents stay available in the picker. */
+/* Zuhma brand coral — tokens converted from zuhma.com's primary
+ * accent (#F94B5A). Default theme so the app matches the Zuhma
+ * identity out of the box; the other accents stay available in the
+ * picker. */
 :root,
-html[data-theme="zentro"] {
-  --primary: oklch(0.795 0.214 144.9);
-  --primary-foreground: oklch(0.208 0.06 150);
-  --primary-hover: oklch(0.85 0.19 145);
-  --primary-soft: oklch(0.795 0.214 144.9 / 0.12);
-  --primary-soft-2: oklch(0.795 0.214 144.9 / 0.22);
-  --ring: oklch(0.795 0.214 144.9);
-  --chart-1: oklch(0.795 0.214 144.9);
-  --chart-2: oklch(0.416 0.096 149.9);
-  --sidebar-primary: oklch(0.795 0.214 144.9);
-  --sidebar-primary-foreground: oklch(0.208 0.06 150);
-  --sidebar-ring: oklch(0.795 0.214 144.9);
+html[data-theme="zuhma"] {
+  --primary: oklch(0.663 0.211 20.1);
+  --primary-foreground: oklch(0.985 0 0);
+  --primary-hover: oklch(0.72 0.19 20.1);
+  --primary-soft: oklch(0.663 0.211 20.1 / 0.12);
+  --primary-soft-2: oklch(0.663 0.211 20.1 / 0.22);
+  --ring: oklch(0.663 0.211 20.1);
+  --chart-1: oklch(0.663 0.211 20.1);
+  --chart-2: oklch(0.416 0.096 20.1);
+  --sidebar-primary: oklch(0.663 0.211 20.1);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-ring: oklch(0.663 0.211 20.1);
 }
 
 html[data-theme="violet"] {

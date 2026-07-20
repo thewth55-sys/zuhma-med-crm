@@ -10,11 +10,11 @@ const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
  *
  * CSP is enforced (not report-only) as of the production-readiness
  * pass — audited every client-side external resource in the app
- * first (no <iframe>, no client fetch() to external hosts, only two
- * <Script> tags — theme-boot and the Zoho Desk widget — and Stripe
- * Checkout/Portal are plain server-issued redirect URLs the browser
- * navigates to, not an embedded Stripe.js/iframe, so they need
- * nothing here). If a future integration trips this, the fix is
+ * first (no <iframe>, no client fetch() to external hosts, only the
+ * theme-boot <Script> tag — and Stripe Checkout/Portal are plain
+ * server-issued redirect URLs the browser navigates to, not an
+ * embedded Stripe.js/iframe, so they need nothing here). If a future
+ * integration trips this, the fix is
  * either adding its host to the relevant directive below, or (for
  * something to test broadly before enforcing) temporarily switching
  * the header key back to `Content-Security-Policy-Report-Only`.
@@ -55,29 +55,18 @@ const SECURITY_HEADERS = [
       // src/lib/conversions/gtag.ts), never loaded unconditionally.
       // challenges.cloudflare.com is the Turnstile login CAPTCHA
       // (src/components/auth/turnstile-widget.tsx) — only loads when
-      // NEXT_PUBLIC_TURNSTILE_SITE_KEY is configured. zoho.com /
-      // zohostatic.com / zohopublic.com are the Zoho Desk support
-      // chat widget (loaded on every page — see layout.tsx), covering
-      // the whole family of subdomains it's known to reach for its
-      // static assets and chat backend. connect.facebook.net is
-      // Meta's JS SDK, loaded only on Settings → WhatsApp when
+      // NEXT_PUBLIC_TURNSTILE_SITE_KEY is configured. connect.facebook.net
+      // is Meta's JS SDK, loaded only on Settings → WhatsApp when
       // NEXT_PUBLIC_META_APP_ID is set (WhatsApp Embedded Signup —
       // see whatsapp-embedded-signup-button.tsx).
-      // zohocdn.com is a THIRD Zoho asset domain, separate from
-      // zoho.com/zohostatic.com/zohopublic.com — the widget's own
-      // bootstrap script (im.zoho.com) loads a "visitor SDK" script
-      // from static.zohocdn.com, which was missing here and silently
-      // blocked the whole widget even after the zohopublic.com fix
-      // (confirmed live via a securitypolicyviolation event naming
-      // this exact URL — see commit history for that investigation).
       // unpkg.com serves the Lucide icon UMD bundle used by the
       // public marketing landing (src/app/page.tsx), which renders
       // outside the app's normal lucide-react import graph.
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://challenges.cloudflare.com https://*.zoho.com https://*.zohostatic.com https://*.zohopublic.com https://*.zohocdn.com https://connect.facebook.net https://unpkg.com",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://challenges.cloudflare.com https://connect.facebook.net https://unpkg.com",
       // Tailwind + inline style attributes on lots of components.
       // fonts.googleapis.com serves the landing page's Google Fonts
       // stylesheet (Manrope / JetBrains Mono).
-      "style-src 'self' 'unsafe-inline' https://*.zohostatic.com https://*.zohopublic.com https://*.zohocdn.com https://fonts.googleapis.com",
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       // Supabase public-bucket avatars, contact avatars (arbitrary
       // https URLs paste-able from the UI), OG images, data URLs for
       // tiny inline assets.
@@ -87,7 +76,7 @@ const SECURITY_HEADERS = [
       "media-src 'self' blob: https://*.supabase.co",
       // fonts.gstatic.com serves the actual Manrope/JetBrains Mono
       // font files referenced by the landing page's Google Fonts CSS.
-      "font-src 'self' data: https://*.zohostatic.com https://*.zohopublic.com https://*.zohocdn.com https://fonts.gstatic.com",
+      "font-src 'self' data: https://fonts.gstatic.com",
       // Supabase REST + realtime (WSS). All Graph API calls (sending
       // messages, registering numbers, etc.) happen server-side, so
       // graph.facebook.com does not belong here — connect.facebook.net
@@ -105,21 +94,13 @@ const SECURITY_HEADERS = [
       // local-currency estimate (src/lib/currency/geo-estimate.ts) —
       // client-side, best-effort, display-only (billing always stays
       // USD via Stripe).
-      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://www.googletagmanager.com https://www.google.com https://googleads.g.doubleclick.net https://challenges.cloudflare.com https://*.zoho.com wss://*.zoho.com https://*.zohopublic.com wss://*.zohopublic.com https://*.zohocdn.com https://*.sentry.io https://*.ingest.sentry.io https://*.ingest.us.sentry.io https://*.ingest.de.sentry.io https://connect.facebook.net https://www.facebook.com https://graph.facebook.com https://ipwho.is https://open.er-api.com",
+      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://www.googletagmanager.com https://www.google.com https://googleads.g.doubleclick.net https://challenges.cloudflare.com https://*.sentry.io https://*.ingest.sentry.io https://*.ingest.us.sentry.io https://*.ingest.de.sentry.io https://connect.facebook.net https://www.facebook.com https://graph.facebook.com https://ipwho.is https://open.er-api.com",
       // Turnstile renders its interactive challenge inside an iframe
-      // from this origin when it can't pass invisibly; Zoho Desk's
-      // chat panel is also an iframe; WhatsApp Embedded Signup opens
-      // Meta's popup as a real window, not an iframe, but the JS SDK
-      // itself loads a small hidden iframe from facebook.com for
-      // login-status tracking.
-      "frame-src https://challenges.cloudflare.com https://*.zoho.com https://*.zohopublic.com https://www.facebook.com https://web.facebook.com",
-      // Zoho Desk's SDK spins up a background Web Worker from a
-      // blob: URL (its "visitor container") — without an explicit
-      // worker-src, browsers fall back to script-src, which doesn't
-      // allow blob:, so the worker (and possibly the chat bubble
-      // that depends on it finishing setup) silently failed to
-      // start. Confirmed live via a securitypolicyviolation naming
-      // this exact blob: worker URL.
+      // from this origin when it can't pass invisibly; WhatsApp
+      // Embedded Signup opens Meta's popup as a real window, not an
+      // iframe, but the JS SDK itself loads a small hidden iframe
+      // from facebook.com for login-status tracking.
+      "frame-src https://challenges.cloudflare.com https://www.facebook.com https://web.facebook.com",
       "worker-src 'self' blob:",
       "frame-ancestors 'none'",
       "base-uri 'self'",

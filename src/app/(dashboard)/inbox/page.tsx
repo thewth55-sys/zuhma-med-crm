@@ -16,7 +16,6 @@ import { ContactSidebar } from "@/components/inbox/contact-sidebar";
 import { toast } from "sonner";
 import { WifiOff } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { PlanGate } from "@/components/billing-platform/plan-gate";
 
 // Remembers the agent's show/hide choice for the desktop contact panel
 // across reloads and sessions (device-scoped, like the theme prefs).
@@ -552,7 +551,6 @@ export default function InboxPage() {
   const hasActiveConv = !!activeConversation;
 
   return (
-    <PlanGate feature="whatsapp_inbox" featureLabel="Bandeja de WhatsApp">
     <div className="-m-4 flex h-[calc(100vh-3.5rem)] flex-col overflow-hidden sm:-m-6">
       {/* WhatsApp connection banner — in the flex column, not absolute,
           so it pushes the panels down instead of overlapping them. */}
@@ -628,6 +626,5 @@ export default function InboxPage() {
         )}
       </div>
     </div>
-    </PlanGate>
   );
 }

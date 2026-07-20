@@ -1,9 +1,9 @@
 import { timingSafeEqual } from "node:crypto";
 
 /**
- * Constant-time comparison for the `x-cron-secret` header both cron
- * routes (automations/cron, billing-platform/cron) check against
- * their own env var. A plain `!==` leaks how many leading characters
+ * Constant-time comparison for the `x-cron-secret` header cron
+ * routes (e.g. automations/cron) check against their own env var.
+ * A plain `!==` leaks how many leading characters
  * matched via response-time variance — cheap insurance against that,
  * matching the timing-safe comparisons already used for the WhatsApp/
  * Cal.com webhook signatures and API keys elsewhere in this codebase.

@@ -18,7 +18,6 @@ import {
   Ban,
   Globe,
   KeyRound,
-  Layers,
   Loader2,
   LogIn,
   Mail,
@@ -42,41 +41,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { createClient } from "@/lib/supabase/client";
-import type { Plan, SubscriptionStatus } from "@/lib/billing-platform/plans";
 
 interface AccountActionsMenuProps {
   accountId: string;
   accountName: string;
   ownerEmail: string | null;
-  plan: Plan;
-  subscriptionStatus: SubscriptionStatus;
+  subscriptionStatus: string;
   /** Parent re-fetches the accounts list after any state-changing action. */
   onChanged: () => void;
 }
-
-const PLAN_OPTIONS: { value: Plan; label: string }[] = [
-  { value: "trial", label: "Prueba" },
-  { value: "standalone", label: "Standalone" },
-  { value: "zentro_salud_starter", label: "Zentro Salud Starter" },
-  { value: "zentro_salud_pro", label: "Zentro Salud Pro" },
-];
-
-const STATUS_OPTIONS: { value: SubscriptionStatus; label: string }[] = [
-  { value: "trialing", label: "En prueba" },
-  { value: "active", label: "Activa" },
-  { value: "past_due", label: "Pago vencido" },
-  { value: "canceled", label: "Cancelada" },
-  { value: "trial_expired", label: "Prueba vencida" },
-  { value: "suspended", label: "Suspendida" },
-];
 
 async function postJson(url: string, body?: unknown) {
   const res = await fetch(url, {
@@ -93,16 +67,12 @@ export function AccountActionsMenu({
   accountId,
   accountName,
   ownerEmail,
-  plan,
   subscriptionStatus,
   onChanged,
 }: AccountActionsMenuProps) {
   const router = useRouter();
   const [busyAction, setBusyAction] = useState<string | null>(null);
   const [impersonateOpen, setImpersonateOpen] = useState(false);
-  const [planDialogOpen, setPlanDialogOpen] = useState(false);
-  const [draftPlan, setDraftPlan] = useState<Plan>(plan);
-  const [draftStatus, setDraftStatus] = useState<SubscriptionStatus>(subscriptionStatus);
 
   const isSuspended = subscriptionStatus === "suspended";
 
@@ -181,23 +151,6 @@ export function AccountActionsMenu({
     }
   }
 
-  async function handleSavePlan() {
-    setBusyAction("set-plan");
-    try {
-      await postJson(`/api/platform-admin/accounts/${accountId}/set-plan`, {
-        plan: draftPlan,
-        subscriptionStatus: draftStatus,
-      });
-      toast.success("Plan actualizado");
-      setPlanDialogOpen(false);
-      onChanged();
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "No se pudo actualizar el plan");
-    } finally {
-      setBusyAction(null);
-    }
-  }
-
   return (
     <>
       <DropdownMenu>
@@ -238,17 +191,6 @@ export function AccountActionsMenu({
           <DropdownMenuSeparator />
           <DropdownMenuItem
             disabled={busyAction !== null}
-            onClick={() => {
-              setDraftPlan(plan);
-              setDraftStatus(subscriptionStatus);
-              setPlanDialogOpen(true);
-            }}
-          >
-            <Layers className="size-4" />
-            Cambiar plan / cortesía
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            disabled={busyAction !== null}
             onClick={handleToggleSuspend}
             className={isSuspended ? undefined : "text-destructive focus:text-destructive"}
           >
@@ -279,66 +221,6 @@ export function AccountActionsMenu({
             <Button onClick={handleImpersonateConfirm} disabled={busyAction === "impersonate"}>
               {busyAction === "impersonate" ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
               Impersonar
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={planDialogOpen} onOpenChange={setPlanDialogOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Cambiar plan — {accountName}</DialogTitle>
-            <DialogDescription>
-              Escribe directo en la base de datos, sin pasar por Stripe. Úsalo para cortesías
-              (plan pago + estado &quot;Activa&quot; sin cobrar) o para corregir un plan manualmente.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-2">
-            <div className="space-y-2">
-              <label className="text-sm text-muted-foreground">Plan</label>
-              <Select value={draftPlan} onValueChange={(v) => v && setDraftPlan(v as Plan)}>
-                <SelectTrigger className="w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {PLAN_OPTIONS.map((opt) => (
-                    <SelectItem key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm text-muted-foreground">Estado</label>
-              <Select
-                value={draftStatus}
-                onValueChange={(v) => v && setDraftStatus(v as SubscriptionStatus)}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {STATUS_OPTIONS.map((opt) => (
-                    <SelectItem key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setPlanDialogOpen(false)}
-              disabled={busyAction === "set-plan"}
-            >
-              Cancelar
-            </Button>
-            <Button onClick={handleSavePlan} disabled={busyAction === "set-plan"}>
-              {busyAction === "set-plan" ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-              Guardar
             </Button>
           </DialogFooter>
         </DialogContent>

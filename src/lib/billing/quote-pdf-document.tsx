@@ -5,15 +5,15 @@
 // Node-side layout engine).
 //
 // Branding is entirely account-driven: accounts.logo_url (falls back
-// to no image — NOT the Zentro Med isotipo, since this document
-// represents the CLINIC's brand to ITS patient, not Zentro Med's),
-// accounts.quote_accent_color (falls back to Zentro's real brand
+// to no image — NOT the Zuhma Med CRM isotipo, since this document
+// represents the CLINIC's brand to ITS patient, not Zuhma Med CRM's),
+// accounts.quote_accent_color (falls back to Zuhma's real brand
 // green — see pdf-theme.ts), accounts.quote_terms (omitted entirely
 // when blank).
 // ============================================================
 
 import { Document, Page, View, Text, Image } from "@react-pdf/renderer";
-import { createPdfStyles, fmtMoney, ZENTRO_GREEN } from "./pdf-theme";
+import { createPdfStyles, fmtMoney, ZUHMA_CORAL } from "./pdf-theme";
 
 export interface QuotePdfLineItem {
   description: string;
@@ -46,7 +46,7 @@ export interface QuotePdfProps {
 }
 
 export function QuotePdfDocument(props: QuotePdfProps) {
-  const accent = props.accentColor || ZENTRO_GREEN;
+  const accent = props.accentColor || ZUHMA_CORAL;
   const styles = createPdfStyles(accent);
 
   return (

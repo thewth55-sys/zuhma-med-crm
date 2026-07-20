@@ -14,7 +14,7 @@
 //
 // Why the `zentro_live_` prefix
 //   - Self-identifying: a leaked string is instantly recognisable as
-//     a Zentro Med key (handy for secret-scanners like GitGuardian).
+//     a Zuhma Med CRM key (handy for secret-scanners like GitGuardian).
 //   - Forward-compatible: leaves room for a `zentro_test_` variant if
 //     a sandbox mode is ever added, without reshaping the format.
 // ============================================================

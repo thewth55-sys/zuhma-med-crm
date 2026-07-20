@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 import { requirePlatformAdmin, resolveAccountOwner, logPlatformAdminAction } from "@/lib/auth/platform-admin";
 import { toErrorResponse } from "@/lib/auth/account";
-import { supabaseAdmin } from "@/lib/billing-platform/admin-client";
+import { supabaseAdmin } from "@/lib/supabase/admin-client";
 import { checkRateLimit, rateLimitResponse, RATE_LIMITS } from "@/lib/rate-limit";
 
 /**
@@ -34,7 +34,7 @@ export async function POST(
       return NextResponse.json({ error: "Account not found" }, { status: 404 });
     }
 
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/+$/, "") || "https://med.zentrolabs.com";
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/+$/, "") || "https://app.zuhma.com";
 
     const { error: resetErr } = await supabaseAdmin().auth.resetPasswordForEmail(owner.ownerEmail, {
       redirectTo: `${siteUrl}/auth/callback?next=${encodeURIComponent("/reset-password")}`,

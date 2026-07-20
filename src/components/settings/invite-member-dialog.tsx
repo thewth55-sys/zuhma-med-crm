@@ -16,7 +16,7 @@
 
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { Copy, CreditCard, Loader2, MessageCircle, Sparkles, UserPlus } from 'lucide-react';
+import { Copy, Loader2, MessageCircle, Sparkles } from 'lucide-react';
 
 import { Button, buttonVariants } from '@/components/ui/button';
 import {
@@ -47,24 +47,7 @@ interface InviteMemberDialogProps {
   /** Called after a successful create so the parent re-fetches the
    *  pending-invitations list. */
   onCreated: () => void;
-  /** True once active members reach the plan's included_seats — the
-   *  dialog opens on a "buy a seat first" step instead of the form. */
-  atSeatLimit: boolean;
-  /** False on the trial plan (nothing to bill an extra seat onto) and
-   *  on plans without a configured seat-addon price. */
-  canAddPaidSeat: boolean;
 }
-
-// Public numbers already shown on /pricing — duplicated here as a
-// small literal (like PLAN_LABEL in signup/page.tsx) rather than
-// importing lib/billing-platform/plans, which reads server-only
-// Stripe price-id env vars at module scope. Display-only; the actual
-// charge is computed server-side by Stripe's proration.
-const SEAT_PRICE_USD: Record<string, number> = {
-  standalone: 35,
-  zentro_salud_starter: 15,
-  zentro_salud_pro: 15,
-};
 
 const EXPIRY_OPTIONS = [
   { value: '1', labelKey: 'days1' },
@@ -90,8 +73,6 @@ export function InviteMemberDialog({
   open,
   onOpenChange,
   onCreated,
-  atSeatLimit,
-  canAddPaidSeat,
 }: InviteMemberDialogProps) {
   const t = useTranslations('Settings.invite');
   const tRoles = useTranslations('Settings.roles');
@@ -101,11 +82,6 @@ export function InviteMemberDialog({
   const [label, setLabel] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState<CreatedInvite | null>(null);
-  // Starts true whenever the dialog doesn't need the seat-purchase
-  // gate at all (not at the limit) — only flips false when it does,
-  // and flips back to true once the owner confirms the extra seat.
-  const [seatConfirmed, setSeatConfirmed] = useState(!atSeatLimit);
-  const [addingSeat, setAddingSeat] = useState(false);
 
   function reset() {
     setRole('agent');
@@ -113,27 +89,6 @@ export function InviteMemberDialog({
     setLabel('');
     setResult(null);
     setSubmitting(false);
-    setSeatConfirmed(!atSeatLimit);
-    setAddingSeat(false);
-  }
-
-  async function handleAddSeat() {
-    setAddingSeat(true);
-    try {
-      const res = await fetch('/api/billing-platform/seats/add', { method: 'POST' });
-      const body = await res.json().catch(() => null);
-      if (!res.ok) {
-        toast.error(body?.error ?? 'Could not add a seat to your subscription');
-        return;
-      }
-      toast.success('Seat added — your next invoice will include the prorated charge');
-      setSeatConfirmed(true);
-    } catch (err) {
-      console.error('[InviteMemberDialog] add-seat error:', err);
-      toast.error('Could not reach the server. Try again?');
-    } finally {
-      setAddingSeat(false);
-    }
   }
 
   async function handleCreate() {
@@ -180,7 +135,7 @@ export function InviteMemberDialog({
         // string if `account` hasn't loaded yet (shouldn't happen
         // — the dialog requires admin+ which requires a loaded
         // profile — but stay safe).
-        accountName: account?.name ?? 'our Zentro Med account',
+        accountName: account?.name ?? 'our Zuhma Med CRM account',
       });
       onCreated();
     } catch (err) {
@@ -209,7 +164,7 @@ export function InviteMemberDialog({
     // they're being invited to before clicking through. This matters
     // for users in multi-team contexts where "our wacrm account"
     // wouldn't be enough to disambiguate.
-    const accountName = result?.accountName ?? 'our Zentro Med account';
+    const accountName = result?.accountName ?? 'our Zuhma Med CRM account';
     const message = t('whatsappMessage', { accountName, expiresInDays: result?.expiresInDays ?? 0, url });
     return `https://wa.me/?text=${encodeURIComponent(message)}`;
   }
@@ -226,54 +181,7 @@ export function InviteMemberDialog({
       }}
     >
       <DialogContent className="bg-popover border-border sm:max-w-md">
-        {!seatConfirmed ? (
-          <>
-            <DialogHeader>
-              <DialogTitle className="flex items-center gap-2 text-popover-foreground">
-                <CreditCard className="size-4 text-primary" />
-                Seat limit reached
-              </DialogTitle>
-              <DialogDescription className="text-muted-foreground">
-                {canAddPaidSeat ? (
-                  <>
-                    Your plan includes a set number of seats, and you&apos;re already using all
-                    of them. Adding one more costs{' '}
-                    <strong className="text-foreground">
-                      ${account?.plan ? (SEAT_PRICE_USD[account.plan] ?? '—') : '—'} USD/month
-                    </strong>
-                    , prorated onto your next invoice — then you can invite.
-                  </>
-                ) : (
-                  'This account has no active paid subscription to add a seat to. Activate a plan from Settings → Subscription first.'
-                )}
-              </DialogDescription>
-            </DialogHeader>
-
-            <DialogFooter className="bg-popover border-border">
-              <Button
-                variant="outline"
-                onClick={() => onOpenChange(false)}
-                className="border-border text-muted-foreground hover:bg-muted"
-              >
-                {t('cancel')}
-              </Button>
-              {canAddPaidSeat ? (
-                <Button
-                  onClick={handleAddSeat}
-                  disabled={addingSeat}
-                  className="bg-primary hover:bg-primary/90 text-primary-foreground"
-                >
-                  {addingSeat ? (
-                    <Loader2 className="size-4 animate-spin" />
-                  ) : (
-                    <UserPlus className="size-4" />
-                  )}
-                  Add seat & continue
-                </Button>
-              ) : null}
-            </DialogFooter>
-          </>
-        ) : result ? (
+        {result ? (
           <>
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2 text-popover-foreground">

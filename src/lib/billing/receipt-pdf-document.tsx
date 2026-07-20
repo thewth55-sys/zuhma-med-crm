@@ -8,7 +8,7 @@
 // ============================================================
 
 import { Document, Page, View, Text, Image, StyleSheet } from "@react-pdf/renderer";
-import { createPdfStyles, fmtMoney, ZENTRO_GREEN, ZENTRO_GREEN_DARK } from "./pdf-theme";
+import { createPdfStyles, fmtMoney, ZUHMA_CORAL, ZUHMA_CORAL_DARK } from "./pdf-theme";
 
 export interface ReceiptPdfProps {
   accountName: string;
@@ -36,7 +36,7 @@ const METHOD_LABELS: Record<string, string> = {
 };
 
 export function ReceiptPdfDocument(props: ReceiptPdfProps) {
-  const accent = props.accentColor || ZENTRO_GREEN;
+  const accent = props.accentColor || ZUHMA_CORAL;
   const remaining = Math.max(0, props.invoiceTotal - props.amountPaid);
   const styles = createPdfStyles(accent);
   const receiptStyles = StyleSheet.create({
@@ -49,7 +49,7 @@ export function ReceiptPdfDocument(props: ReceiptPdfProps) {
       backgroundColor: "#f7f7f7",
     },
     amountLabel: { fontSize: 9, color: "#999", textTransform: "uppercase", letterSpacing: 0.5 },
-    amountValue: { fontSize: 30, fontWeight: 700, color: ZENTRO_GREEN_DARK, marginTop: 6 },
+    amountValue: { fontSize: 30, fontWeight: 700, color: ZUHMA_CORAL_DARK, marginTop: 6 },
     amountMethod: { fontSize: 9, color: "#888", marginTop: 4 },
     summaryRow: { flexDirection: "row", justifyContent: "space-between", paddingVertical: 4 },
     summaryLabel: { color: "#666" },
@@ -102,7 +102,7 @@ export function ReceiptPdfDocument(props: ReceiptPdfProps) {
           </View>
           <View style={styles.balanceRow}>
             <Text style={styles.balanceLabel}>Saldo pendiente</Text>
-            <Text style={[styles.grandTotalValue, { color: remaining > 0 ? "#b45309" : ZENTRO_GREEN_DARK }]}>
+            <Text style={[styles.grandTotalValue, { color: remaining > 0 ? "#b45309" : ZUHMA_CORAL_DARK }]}>
               {fmtMoney(remaining, props.currency)}
             </Text>
           </View>

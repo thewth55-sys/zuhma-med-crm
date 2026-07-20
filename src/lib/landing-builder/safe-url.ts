@@ -20,7 +20,7 @@ export function sanitizeHref(url: string | undefined | null): string | undefined
   if (!trimmed) return undefined;
 
   try {
-    const resolved = new URL(trimmed, "https://zentro-med-landing.invalid/");
+    const resolved = new URL(trimmed, "https://zuhma-med-crm-landing.invalid/");
     if (!ALLOWED_PROTOCOLS.has(resolved.protocol)) return undefined;
     return trimmed;
   } catch {

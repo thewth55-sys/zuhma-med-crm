@@ -7,7 +7,7 @@ import { NextResponse } from "next/server";
 
 import { requirePlatformAdmin, logPlatformAdminAction } from "@/lib/auth/platform-admin";
 import { toErrorResponse } from "@/lib/auth/account";
-import { supabaseAdmin } from "@/lib/billing-platform/admin-client";
+import { supabaseAdmin } from "@/lib/supabase/admin-client";
 
 export async function DELETE(
   _request: Request,

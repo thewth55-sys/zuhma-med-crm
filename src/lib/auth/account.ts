@@ -29,7 +29,6 @@ import { NextResponse } from "next/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
-import type { Plan, SubscriptionStatus } from "@/lib/billing-platform/plans";
 import { hasMinRole, isAccountRole, type AccountRole } from "./roles";
 
 // ------------------------------------------------------------
@@ -104,11 +103,10 @@ export interface AccountContext {
   account: {
     id: string;
     name: string;
-    plan: Plan;
-    subscriptionStatus: SubscriptionStatus;
+    plan: string;
+    subscriptionStatus: string;
     trialEndsAt: string;
     includedSeats: number;
-    stripeCustomerId: string | null;
     logoUrl: string | null;
     quoteTerms: string | null;
     quoteAccentColor: string | null;
@@ -180,7 +178,7 @@ export async function getCurrentAccount(options?: { allowSuspended?: boolean }):
   const { data: account, error: accountErr } = await supabase
     .from("accounts")
     .select(
-      "id, name, plan, subscription_status, trial_ends_at, included_seats, stripe_customer_id, logo_url, quote_terms, quote_accent_color, address, tax_id",
+      "id, name, plan, subscription_status, trial_ends_at, included_seats, logo_url, quote_terms, quote_accent_color, address, tax_id",
     )
     .eq("id", data.account_id)
     .maybeSingle();
@@ -224,7 +222,6 @@ export async function getCurrentAccount(options?: { allowSuspended?: boolean }):
       subscriptionStatus: account.subscription_status,
       trialEndsAt: account.trial_ends_at,
       includedSeats: account.included_seats,
-      stripeCustomerId: account.stripe_customer_id,
       logoUrl: account.logo_url,
       quoteTerms: account.quote_terms,
       quoteAccentColor: account.quote_accent_color,

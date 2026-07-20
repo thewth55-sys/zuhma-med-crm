@@ -1,7 +1,7 @@
 "use client";
 
 // ============================================================
-// /admin/team — manage who has platform-admin access (Zentro Med
+// /admin/team — manage who has platform-admin access (Zuhma Med CRM
 // internal staff, not clinic accounts). Backed by /api/platform-admin/team.
 // ============================================================
 
@@ -113,7 +113,7 @@ export default function AdminTeamPage() {
         <div>
           <h1 className="text-xl font-semibold text-foreground">Equipo interno</h1>
           <p className="text-sm text-muted-foreground">
-            Personas con acceso al panel de administración de Zentro Med — no ven las cuentas de
+            Personas con acceso al panel de administración de Zuhma Med CRM — no ven las cuentas de
             clientes como usuarios de esa cuenta, tienen acceso al panel completo.
           </p>
         </div>
@@ -189,7 +189,7 @@ export default function AdminTeamPage() {
             <Input
               id="team-email"
               type="email"
-              placeholder="nombre@zentrolabs.com"
+              placeholder="nombre@zuhma.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
@@ -211,7 +211,7 @@ export default function AdminTeamPage() {
           <DialogHeader>
             <DialogTitle>Quitar acceso de administrador</DialogTitle>
             <DialogDescription>
-              {revokeTarget?.email} perderá acceso al panel de administración de Zentro Med. Esto no
+              {revokeTarget?.email} perderá acceso al panel de administración de Zuhma Med CRM. Esto no
               afecta ninguna cuenta de cliente a la que pertenezca por separado.
             </DialogDescription>
           </DialogHeader>

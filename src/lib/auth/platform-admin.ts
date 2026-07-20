@@ -3,14 +3,14 @@
 //
 // Deliberately separate from `account.ts` — `requireRole()` answers
 // "does this user have enough privilege INSIDE their own account",
-// while this answers "is this user Zentro Med staff, with no
+// while this answers "is this user Zuhma staff, with no
 // particular account of their own". A user can be a platform admin
 // and simultaneously a plain `viewer` (or nothing at all) in every
 // clinic's account — the two are unrelated axes.
 // ============================================================
 
 import { createClient } from "@/lib/supabase/server";
-import { supabaseAdmin } from "@/lib/billing-platform/admin-client";
+import { supabaseAdmin } from "@/lib/supabase/admin-client";
 import { UnauthorizedError, ForbiddenError } from "./account";
 
 export interface PlatformAdminContext {

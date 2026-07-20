@@ -24,5 +24,5 @@ export function getBaseUrl(request: Request): string {
     return `${reqProto}://${host}`;
   }
 
-  return "https://med.zentrolabs.com";
+  return "https://app.zuhma.com";
 }

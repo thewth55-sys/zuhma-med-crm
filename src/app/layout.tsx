@@ -7,7 +7,6 @@ import "./globals.css";
 import { ThemeProvider } from "@/hooks/use-theme";
 import { ThemedToaster } from "@/components/themed-toaster";
 import { PwaRegister } from "@/components/pwa-register";
-import { ZohoDeskWidget } from "@/components/zoho-desk-widget";
 import {
   DEFAULT_MODE,
   DEFAULT_THEME,
@@ -24,8 +23,8 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: {
-    default: "Zentro Med",
-    template: "%s — Zentro Med",
+    default: "Zuhma Med CRM",
+    template: "%s — Zuhma Med CRM",
   },
   description: "CRM/EHR médico multi-tenant con bandeja de WhatsApp, agenda, expediente clínico y facturación.",
   robots: {
@@ -48,7 +47,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "Zentro Med",
+    title: "Zuhma Med CRM",
   },
 };
 
@@ -130,7 +129,6 @@ export default async function RootLayout({
             <PwaRegister />
           </ThemeProvider>
         </NextIntlClientProvider>
-        <ZohoDeskWidget />
       </body>
     </html>
   );

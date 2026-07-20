@@ -259,22 +259,6 @@ export default function JoinPage() {
               >
                 Try again
               </Button>
-              <Link href="/signup">
-                <Button
-                  variant="outline"
-                  className="w-full border-border text-muted-foreground hover:bg-muted hover:text-foreground"
-                >
-                  Create a new account instead
-                </Button>
-              </Link>
-            </>
-          ) : (
-            <>
-              <Link href="/signup">
-                <Button className="w-full bg-primary text-primary-foreground hover:bg-primary/90">
-                  Create a new account instead
-                </Button>
-              </Link>
               <Link href="/login">
                 <Button
                   variant="outline"
@@ -283,6 +267,17 @@ export default function JoinPage() {
                   Sign in
                 </Button>
               </Link>
+            </>
+          ) : (
+            <>
+              <Link href="/login">
+                <Button className="w-full bg-primary text-primary-foreground hover:bg-primary/90">
+                  Sign in
+                </Button>
+              </Link>
+              <p className="text-center text-xs text-muted-foreground">
+                Ask whoever invited you to send a new link.
+              </p>
             </>
           )}
         </CardContent>

@@ -87,7 +87,7 @@ export async function POST(
       brandName: account.name,
       logoUrl: account.logoUrl,
       accentColor: account.quoteAccentColor,
-      footerNote: `Enviado por ${account.name} vía Zentro Med.`,
+      footerNote: `Enviado por ${account.name} vía Zuhma Med CRM.`,
     });
 
     await sendEmail({

@@ -18,7 +18,7 @@ import type { LandingProps } from "./puck-config";
  */
 
 /**
- * Self-serve tier (Zentro Med / "solo CRM" plan and up): a doctor
+ * Self-serve tier (Zuhma Med CRM / "solo CRM" plan and up): a doctor
  * builds their own page. Deliberately just 3 blocks — enough for a
  * one-page "who we are + how to reach us" site without the surface
  * area to produce something that looks broken or off-brand
@@ -68,7 +68,7 @@ export const basicConfig: Config<Pick<LandingProps, "Hero" | "ServiceList" | "Co
 };
 
 /**
- * Full tier: everything, used exclusively by Zentro's internal
+ * Full tier: everything, used exclusively by Zuhma's internal
  * design team from the platform-admin editor (see
  * /admin/accounts/[accountId]/landing) to fulfil the "Landing de
  * especialidad" line item on the Starter/Pro plans as a white-glove

@@ -10,7 +10,7 @@ import { refreshAccessToken, getFreeBusy } from "@/lib/google-calendar/client";
  * already has something in [from, to). Used by the appointment editor
  * to warn staff before double-booking someone who also keeps a
  * personal calendar — it does NOT read event details and does NOT
- * create any Zentro Med record from what it finds.
+ * create any Zuhma Med CRM record from what it finds.
  *
  * Always resolves with `{ busy, connected }` rather than a 4xx/5xx for
  * any of "doctor has no linked account", "not connected", "expired

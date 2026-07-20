@@ -30,9 +30,8 @@ const ACCEPTED_TYPES = ["image/png", "image/jpeg", "image/webp"];
 /**
  * Fotos tab — durable clinical photo history per patient, uploaded to
  * the private `clinical-photos` bucket (migration 067) and displayed
- * via short-lived signed URLs, never a public link. Same
- * converted-patient gate as the odontogram — only available once the
- * contact has a patient_profiles row.
+ * via short-lived signed URLs, never a public link. Only available
+ * once the contact has a patient_profiles row (converted-patient gate).
  */
 export function VisitPhotosTab({ contactId }: VisitPhotosTabProps) {
   const t = useTranslations("Contacts.detailView.photosTab");

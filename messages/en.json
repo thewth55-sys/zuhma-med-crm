@@ -17,7 +17,7 @@
   "SignupPage": {
     "title": "Create account",
     "titleInvite": "Create account & join",
-    "desc": "Get started with Zentro Med",
+    "desc": "Get started with Zuhma Med CRM",
     "descInvite": "Verify your email, then accept the invitation to join your team.",
     "fullNameLabel": "Full name",
     "fullNamePlaceholder": "John Doe",
@@ -74,7 +74,7 @@
     "passwordRule_needsNumber": "Password must include at least one number"
   },
   "Sidebar": {
-    "title": "Zentro Med",
+    "title": "Zuhma Med CRM",
     "dashboard": "Dashboard",
     "inbox": "Inbox",
     "notifications": "Notifications",
@@ -101,7 +101,6 @@
     "menuProfile": "Profile",
     "menuMyAvailability": "My availability",
     "menuSettings": "Settings",
-    "menuHelp": "Help",
     "menuSignOut": "Sign out"
   },
   "Header": {
@@ -430,7 +429,6 @@
         "activity": "Activity",
         "notes": "Notes",
         "medical": "Medical",
-        "odontogram": "Odontogram",
         "photos": "Photos",
         "appointments": "Appointments",
         "billing": "Billing",
@@ -531,26 +529,6 @@
         "noteSaveFailed": "Failed to save the clinical note",
         "addendumSaved": "Addendum saved",
         "addendumSaveFailed": "Failed to save the addendum"
-      },
-      "odontogramTab": {
-        "noProfile": "This contact isn't a converted patient yet — create their medical profile in the Medical tab to enable the odontogram.",
-        "toothLabel": "Tooth {number}",
-        "condition": "Condition",
-        "notes": "Notes",
-        "save": "Save",
-        "toothSaved": "Tooth updated",
-        "toothSaveFailed": "Failed to update tooth",
-        "conditions": {
-          "healthy": "Healthy",
-          "caries": "Caries",
-          "filled": "Filled",
-          "crown": "Crown",
-          "root_canal": "Root canal",
-          "missing": "Missing",
-          "extraction_planned": "Extraction planned",
-          "implant": "Implant",
-          "bridge": "Bridge"
-        }
       },
       "photosTab": {
         "noProfile": "This contact isn't a converted patient yet — create their medical profile in the Medical tab to enable photos.",
@@ -1689,7 +1667,7 @@
       "labelTooLong": "Label must be {max} characters or fewer",
       "copied": "Invite link copied",
       "clipboardBlocked": "Clipboard blocked — copy the link manually",
-      "whatsappMessage": "Join {accountName} on Zentro Med using this link (valid for {expiresInDays} days): {url}"
+      "whatsappMessage": "Join {accountName} on Zuhma Med CRM using this link (valid for {expiresInDays} days): {url}"
     },
     "tagsAndFields": {
       "title": "Fields & tags",
@@ -1800,8 +1778,8 @@
       "saveResubmit": "Save & Resubmit",
       "submitApproval": "Submit for Approval",
       "deleteDialogTitle": "Delete template?",
-      "deleteMetaDesc": "\"{name}\" will be deleted from Meta and from Zentro Med. Active broadcasts using this template will start failing on their next send. This can't be undone.",
-      "deleteLocalDesc": "\"{name}\" will be deleted from Zentro Med. It was never submitted to Meta, so no remote cleanup is needed.",
+      "deleteMetaDesc": "\"{name}\" will be deleted from Meta and from Zuhma Med CRM. Active broadcasts using this template will start failing on their next send. This can't be undone.",
+      "deleteLocalDesc": "\"{name}\" will be deleted from Zuhma Med CRM. It was never submitted to Meta, so no remote cleanup is needed.",
       "deleting": "Deleting…",
       "delete": "Delete",
       "toastLoadFailed": "Failed to load templates",
@@ -1842,7 +1820,7 @@
       "notConnected": "Not Connected",
       "connectedDesc": "Your access token authenticates with Meta. See Registration status below for whether webhooks are actually wired.",
       "notConnectedDesc": "Configure your Meta API credentials below to connect your WhatsApp Business account.",
-      "registered": "Registered — Meta will deliver events to Zentro Med",
+      "registered": "Registered — Meta will deliver events to Zuhma Med CRM",
       "notRegistered": "Not registered — Meta will not deliver events",
       "verifyWithMeta": "Verify with Meta",
       "subscribedSince": "Subscribed since {date}. Click Verify with Meta if events stop arriving.",
@@ -1866,7 +1844,7 @@
       "twoStepPin": "Two-step verification PIN",
       "optional": "(optional)",
       "pinPlaceholder": "6-digit PIN from Meta WhatsApp Manager",
-      "pinHint": "Needed only to wire inbound messages for a production number. Set it in Meta Business Manager → WhatsApp Accounts → Phone Numbers → Two-step verification, then paste it here so Zentro Med can subscribe the number — otherwise Meta routes inbound events to whichever app last claimed it (the symptom that hits second numbers under a shared WABA). Meta test numbers have no PIN and are pre-registered — leave this blank for them. Leaving it blank also keeps an existing registration untouched.",
+      "pinHint": "Needed only to wire inbound messages for a production number. Set it in Meta Business Manager → WhatsApp Accounts → Phone Numbers → Two-step verification, then paste it here so Zuhma Med CRM can subscribe the number — otherwise Meta routes inbound events to whichever app last claimed it (the symptom that hits second numbers under a shared WABA). Meta test numbers have no PIN and are pre-registered — leave this blank for them. Leaving it blank also keeps an existing registration untouched.",
       "webhookTitle": "Webhook Configuration",
       "webhookDesc": "Use this URL as your webhook callback in the Meta App Dashboard.",
       "webhookUrl": "Webhook Callback URL",
@@ -2065,7 +2043,7 @@
     },
     "aiConfig": {
       "title": "Agent setup",
-      "description": "Bring your own OpenAI or Anthropic key. Zentro Med calls the provider directly with your key — no per-seat AI fees, and your data stays yours. This powers AI-drafted replies in the inbox, the auto-reply bot, and the Playground.",
+      "description": "Bring your own OpenAI or Anthropic key. Zuhma Med CRM calls the provider directly with your key — no per-seat AI fees, and your data stays yours. This powers AI-drafted replies in the inbox, the auto-reply bot, and the Playground.",
       "adminOnlyConfig": "Only admins and owners can change the AI configuration.",
       "loadFailed": "Failed to load AI configuration",
       "providerAndKey": "Provider & key",

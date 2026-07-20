@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { renderToBuffer } from "@react-pdf/renderer";
 
 import { requireRole, toErrorResponse } from "@/lib/auth/account";
-import { supabaseAdmin } from "@/lib/billing-platform/admin-client";
+import { supabaseAdmin } from "@/lib/supabase/admin-client";
 import { ReceiptPdfDocument } from "@/lib/billing/receipt-pdf-document";
 
 const BUCKET = "chat-media";

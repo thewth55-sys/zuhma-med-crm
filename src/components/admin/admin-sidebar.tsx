@@ -3,14 +3,13 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect } from "react";
-import { LayoutDashboard, History, ShieldCheck, Ticket, Users, UserCog, X } from "lucide-react";
+import { LayoutDashboard, History, ShieldCheck, Users, UserCog, X } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
   { href: "/admin/accounts", label: "Cuentas", icon: Users, exact: false },
-  { href: "/admin/coupons", label: "Cupones", icon: Ticket, exact: true },
   { href: "/admin/audit-log", label: "Log de auditoría", icon: History, exact: true },
   { href: "/admin/team", label: "Equipo interno", icon: UserCog, exact: true },
 ];
@@ -56,7 +55,7 @@ export function AdminSidebar({ open = false, onClose }: AdminSidebarProps) {
         <div className="flex items-center justify-between gap-2 border-b border-border px-4 py-4">
           <Link href="/admin" className="flex items-center gap-2">
             <ShieldCheck className="h-5 w-5 text-primary" />
-            <span className="text-sm font-semibold">Zentro Med — Admin</span>
+            <span className="text-sm font-semibold">Zuhma Med CRM — Admin</span>
           </Link>
           <button
             type="button"

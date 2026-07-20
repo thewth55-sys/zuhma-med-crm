@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { supabaseAdmin } from "@/lib/billing-platform/admin-client";
+import { supabaseAdmin } from "@/lib/supabase/admin-client";
 import { verifyCalComWebhookSignature } from "@/lib/cal-com/webhook-signature";
 
 /**

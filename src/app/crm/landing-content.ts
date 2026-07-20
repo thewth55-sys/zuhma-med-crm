@@ -13,17 +13,17 @@ export const STRUCTURED_DATA = {
   "@graph": [
     {
       "@type": "Organization",
-      "@id": "https://med.zentrolabs.com/crm#organization",
-      name: "Zentro Med",
-      url: "https://med.zentrolabs.com/crm",
+      "@id": "https://app.zuhma.com/crm#organization",
+      name: "Zuhma Med CRM",
+      url: "https://app.zuhma.com/crm",
       description: "CRM de WhatsApp con IA para consultorios y clínicas en Latinoamérica.",
       areaServed: ["CO", "MX", "AR", "CL", "PE", "ES"],
     },
     {
       "@type": "Service",
-      "@id": "https://med.zentrolabs.com/crm#service",
+      "@id": "https://app.zuhma.com/crm#service",
       name: "CRM para Consultorios y Clínicas",
-      provider: { "@id": "https://med.zentrolabs.com/crm#organization" },
+      provider: { "@id": "https://app.zuhma.com/crm#organization" },
       description:
         "CRM de gestión comercial para consultorios: WhatsApp compartido con IA, agenda online 24/7, seguimiento y reactivación de pacientes. Marketing gestionado disponible como upgrade opcional.",
       serviceType: "Software CRM para Salud",
@@ -31,7 +31,7 @@ export const STRUCTURED_DATA = {
     },
     {
       "@type": "AggregateRating",
-      itemReviewed: { "@id": "https://med.zentrolabs.com/crm#service" },
+      itemReviewed: { "@id": "https://app.zuhma.com/crm#service" },
       ratingValue: "5",
       bestRating: "5",
       ratingCount: "80",
@@ -46,8 +46,8 @@ export const LANDING_BODY_HTML = `
     <div class="nav-i">
       <a href="/" class="logo">
         <img src="/zentro-isotipo.png" alt="" style="height:26px;width:26px;">
-        <span class="logo-text">zentro</span>
-        <span class="logo-badge">Med</span>
+        <span class="logo-text">zuhma</span>
+        <span class="logo-badge">Med CRM</span>
       </a>
       <div class="nav-r">
         <a href="#como" class="nav-link">Cómo funciona</a>
@@ -82,7 +82,7 @@ export const LANDING_BODY_HTML = `
           <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
           <span class="nav-login-text">Iniciar sesión</span>
         </a>
-        <a href="/signup" class="btn btn-green btn-sm">Empezar gratis →</a>
+        <a href="/login" class="btn btn-green btn-sm">Empezar gratis →</a>
       </div>
     </div>
   </div>
@@ -105,10 +105,10 @@ export const LANDING_BODY_HTML = `
         <div class="proof-av" style="background:rgba(74,222,90,.2);color:var(--zm-g);">+</div>
       </div>
       <span class="proof-stars">★★★★★</span>
-      <span class="proof-text"><strong>+80 consultorios</strong> ya gestionan con Zentro Med</span>
+      <span class="proof-text"><strong>+80 consultorios</strong> ya gestionan con Zuhma Med CRM</span>
     </div>
     <div class="hero-ctas">
-      <a href="/signup" class="btn btn-green btn-lg" onclick="if(typeof fbq!=='undefined')fbq('track','Lead');if(typeof gtag!=='undefined')gtag('event','generate_lead',{event_category:'cta',event_label:'hero_primary'});">Probar gratis 30 días →</a>
+      <a href="/login" class="btn btn-green btn-lg" onclick="if(typeof fbq!=='undefined')fbq('track','Lead');if(typeof gtag!=='undefined')gtag('event','generate_lead',{event_category:'cta',event_label:'hero_primary'});">Probar gratis 30 días →</a>
       <a href="#planes" class="btn btn-ghost-light btn-lg">Ver planes</a>
     </div>
     <p class="hero-note">// Sin tarjeta · Configuración en 24h · Cancela cuando quieras</p>
@@ -143,7 +143,7 @@ export const LANDING_BODY_HTML = `
       </div>
     </div>
 
-    <img class="hero-illus-img" src="/landing/hero-product.png" alt="CRM de Zentro Med: WhatsApp compartido con IA, agenda de citas y pipeline de pacientes" width="1672" height="941" />
+    <img class="hero-illus-img" src="/landing/hero-product.png" alt="CRM de Zuhma Med CRM: WhatsApp compartido con IA, agenda de citas y pipeline de pacientes" width="1672" height="941" />
   </div>
 </section>
 
@@ -196,9 +196,9 @@ export const LANDING_BODY_HTML = `
 <section class="diff-section">
   <div class="wrap">
     <div class="diff-header reveal">
-      <p class="section-label" style="color:rgba(74,222,90,.6);">// Por qué Zentro Med</p>
+      <p class="section-label" style="color:rgba(74,222,90,.6);">// Por qué Zuhma Med CRM</p>
       <h2 class="section-title" style="color:var(--zm-white);">Tu consultorio merece más<br>que un WhatsApp personal.</h2>
-      <p class="section-sub" style="color:rgba(255,255,255,.45);margin:12px auto 0;">La mayoría de consultorios administra citas por WhatsApp normal, una libreta y la memoria de la recepcionista. Zentro Med reemplaza eso por un sistema real — y te cuesta menos que un asistente administrativo.</p>
+      <p class="section-sub" style="color:rgba(255,255,255,.45);margin:12px auto 0;">La mayoría de consultorios administra citas por WhatsApp normal, una libreta y la memoria de la recepcionista. Zuhma Med CRM reemplaza eso por un sistema real — y te cuesta menos que un asistente administrativo.</p>
     </div>
     <div class="diff-cols reveal-group">
       <div class="diff-col diff-col-bad">
@@ -217,7 +217,7 @@ export const LANDING_BODY_HTML = `
       <div class="diff-col diff-col-good">
         <div class="diff-col-label">
           <div class="diff-icon">✓</div>
-          <span>Con Zentro Med</span>
+          <span>Con Zuhma Med CRM</span>
         </div>
         <ul class="diff-list">
           <li class="diff-item"><div class="diff-dot">✓</div><span class="diff-item-text">Desde <strong>$49/mes</strong> — un CRM completo, no un contrato de agencia</span></li>
@@ -229,7 +229,7 @@ export const LANDING_BODY_HTML = `
       </div>
     </div>
     <div class="diff-bottom reveal">
-      <a href="/signup" class="btn btn-green btn-lg" onclick="if(typeof fbq!=='undefined')fbq('track','Lead');if(typeof gtag!=='undefined')gtag('event','generate_lead',{event_category:'cta',event_label:'differentiator'});">Probar 30 días gratis →</a>
+      <a href="/login" class="btn btn-green btn-lg" onclick="if(typeof fbq!=='undefined')fbq('track','Lead');if(typeof gtag!=='undefined')gtag('event','generate_lead',{event_category:'cta',event_label:'differentiator'});">Probar 30 días gratis →</a>
       <p class="diff-price-note">// Sin tarjeta · Setup en 24h · Cancela cuando quieras</p>
     </div>
   </div>
@@ -271,9 +271,9 @@ export const LANDING_BODY_HTML = `
   <div class="wrap">
     <div class="solution-grid">
       <div class="solution-visual">
-        <img class="illus-img" src="/landing/crm-dashboard.png" alt="Dashboard del CRM de Zentro Med: citas de la semana, no-shows, pacientes nuevos y agenda semanal" width="1672" height="941" />
+        <img class="illus-img" src="/landing/crm-dashboard.png" alt="Dashboard del CRM de Zuhma Med CRM: citas de la semana, no-shows, pacientes nuevos y agenda semanal" width="1672" height="941" />
         <div>
-          <p class="sol-tag">// Zentro Med CRM</p>
+          <p class="sol-tag">// Zuhma Med CRM</p>
           <p class="sol-title">La operación de tu consultorio, organizada</p>
         </div>
         <div class="feature-row"><div class="feat-check"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div><div class="feat-text"><strong>WhatsApp compartido</strong> — Toda la comunicación del consultorio centralizada, con respuestas automáticas para citas y recordatorios.</div></div>
@@ -285,7 +285,7 @@ export const LANDING_BODY_HTML = `
       <div class="solution-copy">
         <p class="section-label">// CRM para consultorios</p>
         <h2 class="section-title">Un sistema que trabaja mientras tú consultas</h2>
-        <p class="section-sub">Zentro Med gestiona la parte comercial y operativa del consultorio para que tú te concentres en el paciente. No en el WhatsApp.</p>
+        <p class="section-sub">Zuhma Med CRM gestiona la parte comercial y operativa del consultorio para que tú te concentres en el paciente. No en el WhatsApp.</p>
         <div class="benefit-list">
           <div class="benefit-item"><div class="benefit-num">1</div><div class="benefit-text"><h4>Reducción de no-shows</h4><p>Los recordatorios automáticos por WhatsApp reducen los no-shows hasta en un 54% en promedio.* Sin que nadie tenga que llamar.</p></div></div>
           <div class="benefit-item"><div class="benefit-num">2</div><div class="benefit-text"><h4>Más reactivaciones</h4><p>Identifica pacientes que no han vuelto en 30, 60 o 90 días y reactívalos automáticamente con un mensaje personalizado.</p></div></div>
@@ -317,7 +317,7 @@ export const LANDING_BODY_HTML = `
         <p class="mid-cta-pre">// ¿Convencido hasta aquí?</p>
         <p class="mid-cta-head">Tu CRM de WhatsApp con IA — activo en 24 horas.</p>
       </div>
-      <a href="/signup" class="btn btn-green btn-lg" style="flex-shrink:0;" onclick="if(typeof fbq!=='undefined')fbq('track','Lead');if(typeof gtag!=='undefined')gtag('event','generate_lead',{event_category:'cta',event_label:'mid_page'});">Empezar gratis →</a>
+      <a href="/login" class="btn btn-green btn-lg" style="flex-shrink:0;" onclick="if(typeof fbq!=='undefined')fbq('track','Lead');if(typeof gtag!=='undefined')gtag('event','generate_lead',{event_category:'cta',event_label:'mid_page'});">Empezar gratis →</a>
     </div>
   </div>
 </div>
@@ -362,13 +362,13 @@ export const LANDING_BODY_HTML = `
           <div class="pf"><div class="pf-check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>Cotizaciones y cobros</div>
           <div class="pf"><div class="pf-check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>1 usuario incluido</div>
         </div>
-        <a href="/signup" class="plan-btn btn-plan-free" onclick="if(typeof fbq!=='undefined')fbq('track','InitiateCheckout');if(typeof gtag!=='undefined')gtag('event','generate_lead',{event_category:'plan',event_label:'free_trial'});">Empezar gratis →</a>
+        <a href="/login" class="plan-btn btn-plan-free" onclick="if(typeof fbq!=='undefined')fbq('track','InitiateCheckout');if(typeof gtag!=='undefined')gtag('event','generate_lead',{event_category:'plan',event_label:'free_trial'});">Empezar gratis →</a>
         <p class="plan-fine">// Sin tarjeta · Cancela cuando quieras</p>
       </div>
 
       <div class="plan-card">
         <span class="plan-badge badge-crm">Solo CRM</span>
-        <div class="plan-name">Zentro Med</div>
+        <div class="plan-name">Zuhma Med CRM</div>
         <div class="plan-price"><sup class="price-sym">$</sup><span class="price-amt" data-usd="49">49</span><sub>/usuario/mes</sub></div>
         <div class="plan-note">+<span class="price-sym">$</span><span class="price-amt" data-usd="25">25</span> <span class="price-curr-label">USD</span> por usuario adicional</div>
         <div class="plan-divider"></div>
@@ -381,7 +381,7 @@ export const LANDING_BODY_HTML = `
           <div class="pf"><div class="pf-check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>Soporte por WhatsApp</div>
           <div class="pf" style="color:var(--zm-muted2);"><div class="pf-check" style="background:var(--zm-line2);"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>Sin marketing gestionado</div>
         </div>
-        <a href="/signup?plan=standalone" class="plan-btn btn-plan-crm" onclick="if(typeof gtag!=='undefined')gtag('event','generate_lead',{event_category:'plan',event_label:'standalone_crm'});">Suscribirme →</a>
+        <a href="/login" class="plan-btn btn-plan-crm" onclick="if(typeof gtag!=='undefined')gtag('event','generate_lead',{event_category:'plan',event_label:'standalone_crm'});">Suscribirme →</a>
         <p class="plan-fine">// Setup <span class="price-sym">$</span><span class="price-amt" data-usd="99">99</span> <span class="price-curr-label">USD</span> · Sin contratos</p>
       </div>
 
@@ -393,7 +393,7 @@ export const LANDING_BODY_HTML = `
         <div class="plan-divider"></div>
         <div class="plan-features">
           <div class="pf"><div class="pf-check pf-check-ai"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div><span class="pf-ai-num">1.500 mensajes IA incluidos</span> · listo desde el día 1 <span class="pf-ai-pill">IA</span></div>
-          <div class="pf"><div class="pf-check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>Todo lo de Zentro Med</div>
+          <div class="pf"><div class="pf-check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>Todo lo de Zuhma Med CRM</div>
           <div class="pf"><div class="pf-check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div><span class="pf-new">Hasta 5.000 pacientes activos</span></div>
           <div class="pf"><div class="pf-check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div><span class="pf-new">Contenido mensual (8 piezas + stories)</span></div>
           <div class="pf"><div class="pf-check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div><span class="pf-new">Meta Ads gestionado</span></div>
@@ -401,7 +401,7 @@ export const LANDING_BODY_HTML = `
           <div class="pf"><div class="pf-check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div><span class="pf-new">Dashboard semanal</span></div>
           <div class="pf"><div class="pf-check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>Soporte prioritario 24h</div>
         </div>
-        <a href="/signup?plan=zentro_salud_starter" class="plan-btn btn-plan-pop" onclick="if(typeof fbq!=='undefined')fbq('track','InitiateCheckout');if(typeof gtag!=='undefined')gtag('event','generate_lead',{event_category:'plan',event_label:'salud_starter'});">Empezar con Starter →</a>
+        <a href="/login" class="plan-btn btn-plan-pop" onclick="if(typeof fbq!=='undefined')fbq('track','InitiateCheckout');if(typeof gtag!=='undefined')gtag('event','generate_lead',{event_category:'plan',event_label:'salud_starter'});">Empezar con Starter →</a>
         <p class="plan-fine">// Setup <span class="price-sym">$</span><span class="price-amt" data-usd="99">99</span> <span class="price-curr-label">USD</span> · 30 días gratis · Sin contratos</p>
       </div>
 
@@ -421,7 +421,7 @@ export const LANDING_BODY_HTML = `
           <div class="pf"><div class="pf-check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div><span class="pf-new">2 sesiones de estrategia/mes</span></div>
           <div class="pf"><div class="pf-check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div><span class="pf-new">Account manager exclusivo · 4h respuesta</span></div>
         </div>
-        <a href="/signup?plan=zentro_salud_pro" class="plan-btn btn-plan-pro" onclick="if(typeof fbq!=='undefined')fbq('track','InitiateCheckout');if(typeof gtag!=='undefined')gtag('event','generate_lead',{event_category:'plan',event_label:'salud_pro'});">Empezar con Pro →</a>
+        <a href="/login" class="plan-btn btn-plan-pro" onclick="if(typeof fbq!=='undefined')fbq('track','InitiateCheckout');if(typeof gtag!=='undefined')gtag('event','generate_lead',{event_category:'plan',event_label:'salud_pro'});">Empezar con Pro →</a>
         <p class="plan-fine">// Setup <span class="price-sym">$</span><span class="price-amt" data-usd="99">99</span> <span class="price-curr-label">USD</span> · 30 días gratis · Sin contratos</p>
       </div>
 
@@ -429,7 +429,7 @@ export const LANDING_BODY_HTML = `
     <p style="text-align:center;margin-top:24px;font-size:12px;color:var(--zm-muted2);font-family:'JetBrains Mono',monospace;line-height:1.8;">
       * En los planes Zentro Salud, el presupuesto de pauta (Meta/Google Ads) va directo a tu cuenta — Zentro gestiona las campañas, tú controlas el dinero.<br>
       † <span style="color:rgba(167,139,250,.7);">Mensajes IA</span> = auto-respuestas + redacción asistida generadas por el agente de IA en WhatsApp. Incluidos en tu plan — Zentro gestiona la infraestructura de IA, no necesitas crear cuentas en OpenAI ni Anthropic.<br>
-      Zentro Med es una plataforma de gestión comercial (CRM). No es un software de historia clínica ni de facturación tributaria.
+      Zuhma Med CRM es una plataforma de gestión comercial (CRM). No es un software de historia clínica ni de facturación tributaria.
     </p>
   </div>
 </section>
@@ -444,7 +444,7 @@ export const LANDING_BODY_HTML = `
     <div class="testi-grid reveal-group">
       <div class="testi-card">
         <div class="testi-stars">★★★★★</div>
-        <p class="testi-quote">"Antes perdía al menos 8 citas por semana por no-shows. Con los recordatorios de WhatsApp de Zentro Med ese número bajó a casi cero en el primer mes."</p>
+        <p class="testi-quote">"Antes perdía al menos 8 citas por semana por no-shows. Con los recordatorios de WhatsApp de Zuhma Med CRM ese número bajó a casi cero en el primer mes."</p>
         <div class="testi-result"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>−87% no-shows · Mes 1</div>
         <div class="testi-author"><div class="testi-av" style="background:#dcfce7;color:#15803d;">DR</div><div><div class="testi-name">Dr. Rodrigo M.</div><div class="testi-role">Médico general · Bogotá</div></div></div>
       </div>
@@ -456,7 +456,7 @@ export const LANDING_BODY_HTML = `
       </div>
       <div class="testi-card">
         <div class="testi-stars">★★★★★</div>
-        <p class="testi-quote">"Teníamos las citas en un cuaderno y el WhatsApp en el celular de mi asistente. Con Zentro Med todo el equipo ve lo mismo, y los pacientes que no volvían en meses ahora reciben un mensaje automático."</p>
+        <p class="testi-quote">"Teníamos las citas en un cuaderno y el WhatsApp en el celular de mi asistente. Con Zuhma Med CRM todo el equipo ve lo mismo, y los pacientes que no volvían en meses ahora reciben un mensaje automático."</p>
         <div class="testi-result"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>+29% pacientes reactivados · Mes 2</div>
         <div class="testi-author"><div class="testi-av" style="background:#f3e8ff;color:#7e22ce;">CE</div><div><div class="testi-name">Dr. Carlos E.</div><div class="testi-role">Ortopedista · Cali</div></div></div>
       </div>
@@ -476,7 +476,7 @@ export const LANDING_BODY_HTML = `
         <div class="faq-q">¿El CRM maneja datos de pacientes de forma segura?
           <svg class="faq-chevron" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
         </div>
-        <div class="faq-a"><div class="faq-a-inner">Sí. Los datos se almacenan con cifrado en tránsito y en reposo. Zentro Med es una herramienta de gestión comercial y marketing — gestiona citas, contactos y comunicaciones de negocio. No es un sistema de historia clínica; los datos clínicos de tus pacientes son tu responsabilidad exclusiva como profesional de salud.</div></div>
+        <div class="faq-a"><div class="faq-a-inner">Sí. Los datos se almacenan con cifrado en tránsito y en reposo. Zuhma Med CRM es una herramienta de gestión comercial y marketing — gestiona citas, contactos y comunicaciones de negocio. No es un sistema de historia clínica; los datos clínicos de tus pacientes son tu responsabilidad exclusiva como profesional de salud.</div></div>
       </div>
       <div class="faq-item" onclick="zmToggleFaq(this)">
         <div class="faq-q">¿Funciona para especialistas, no solo médicos generales?
@@ -488,7 +488,7 @@ export const LANDING_BODY_HTML = `
         <div class="faq-q">¿Puedo usar solo el CRM, sin marketing?
           <svg class="faq-chevron" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
         </div>
-        <div class="faq-a"><div class="faq-a-inner">Sí. El plan Zentro Med es el CRM completo — WhatsApp compartido, IA, agenda y automatizaciones — sin marketing. Si más adelante quieres sumar campañas gestionadas, subes a un plan Zentro Salud cuando quieras; el presupuesto de pauta va directo a tu cuenta de Meta/Google, tú controlas el dinero.</div></div>
+        <div class="faq-a"><div class="faq-a-inner">Sí. El plan Zuhma Med CRM es el CRM completo — WhatsApp compartido, IA, agenda y automatizaciones — sin marketing. Si más adelante quieres sumar campañas gestionadas, subes a un plan Zentro Salud cuando quieras; el presupuesto de pauta va directo a tu cuenta de Meta/Google, tú controlas el dinero.</div></div>
       </div>
       <div class="faq-item" onclick="zmToggleFaq(this)">
         <div class="faq-q">¿Cuánto tarda en estar funcionando el CRM?
@@ -519,7 +519,7 @@ export const LANDING_BODY_HTML = `
     <h2>Tu consultorio merece<br><span>pacientes que regresen.</span></h2>
     <p>30 días con todas las funciones. Sin tarjeta. Configuración en 24 horas.</p>
     <div class="cta-btns">
-      <a href="/signup" class="btn btn-green btn-lg" onclick="if(typeof fbq!=='undefined')fbq('track','Lead');if(typeof gtag!=='undefined')gtag('event','generate_lead',{event_category:'cta',event_label:'cta_final'});">Probar gratis 30 días →</a>
+      <a href="/login" class="btn btn-green btn-lg" onclick="if(typeof fbq!=='undefined')fbq('track','Lead');if(typeof gtag!=='undefined')gtag('event','generate_lead',{event_category:'cta',event_label:'cta_final'});">Probar gratis 30 días →</a>
       <a href="https://wa.me/15752137020" target="_blank" rel="noopener" class="btn btn-ghost-light btn-lg">Hablar con nuestro equipo</a>
     </div>
     <p class="cta-note">// Sin tarjeta · Sin contratos · Cancela cuando quieras</p>
@@ -530,8 +530,8 @@ export const LANDING_BODY_HTML = `
 <footer>
   <div class="wrap">
     <div class="foot-i">
-      <span style="color:rgba(255,255,255,.3);">© 2026 Zentro Labs · <a href="https://zentrolabs.com">zentrolabs.com</a></span>
-      <span><a href="https://zentrolabs.com/privacidad.html">Privacidad</a> · <a href="https://zentrolabs.com/terminos.html">Términos</a> · <a href="mailto:hello@zentrolabs.com">hello@zentrolabs.com</a></span>
+      <span style="color:rgba(255,255,255,.3);">© 2026 Zuhma · <a href="https://zuhma.com">zuhma.com</a></span>
+      <span><a href="https://zuhma.com/privacidad.html">Privacidad</a> · <a href="https://zuhma.com/terminos.html">Términos</a> · <a href="mailto:hello@zuhma.com">hello@zuhma.com</a></span>
     </div>
   </div>
 </footer>
@@ -547,7 +547,7 @@ export const LANDING_BODY_HTML = `
     <span class="mob-cta-price">30 días gratis</span>
     <span class="mob-cta-sub">sin tarjeta · CRM médico con WhatsApp + IA</span>
   </div>
-  <a href="/signup" class="btn btn-green" style="font-size:13px;padding:10px 16px;flex-shrink:0;" onclick="if(typeof gtag!=='undefined')gtag('event','mobile_sticky_cta_click',{event_category:'cta',event_label:'sticky_bar_mobile'});">Empezar →</a>
+  <a href="/login" class="btn btn-green" style="font-size:13px;padding:10px 16px;flex-shrink:0;" onclick="if(typeof gtag!=='undefined')gtag('event','mobile_sticky_cta_click',{event_category:'cta',event_label:'sticky_bar_mobile'});">Empezar →</a>
 </div>
 `;
 

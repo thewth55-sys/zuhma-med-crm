@@ -1,7 +1,6 @@
 import {
   CalendarClock,
   Coins,
-  CreditCard,
   FileText,
   KeyRound,
   LayoutGrid,
@@ -40,7 +39,6 @@ export const SETTINGS_SECTIONS = [
   'conversions',
   'scheduling',
   'billing',
-  'billing-platform',
 ] as const;
 
 export type SettingsSection = (typeof SETTINGS_SECTIONS)[number];
@@ -70,7 +68,6 @@ export const SECTION_META: Record<SettingsSection, SectionMeta> = {
   conversions: { id: 'conversions', label: 'Conversions', icon: Target, group: 'workspace' },
   scheduling: { id: 'scheduling', label: 'Scheduling', icon: CalendarClock, group: 'workspace' },
   billing: { id: 'billing', label: 'Billing', icon: Receipt, group: 'workspace' },
-  'billing-platform': { id: 'billing-platform', label: 'Subscription', icon: CreditCard, group: 'workspace' },
 };
 
 export const RAIL_GROUPS: { label: string | null; group: SectionMeta['group'] }[] = [

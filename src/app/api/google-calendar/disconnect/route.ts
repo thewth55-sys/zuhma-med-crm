@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 /**
  * POST /api/google-calendar/disconnect — clears the caller's stored
  * tokens. Does NOT revoke the grant on Google's side (Google keeps
- * showing Zentro Med under the user's "Third-party access" until
+ * showing Zuhma Med CRM under the user's "Third-party access" until
  * they revoke it there themselves) — deleting our copy of the
  * refresh token is what actually stops future sync calls, which is
  * the part that matters for this app. Existing

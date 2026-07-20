@@ -2,13 +2,13 @@ import { NextResponse } from "next/server";
 
 import { requirePlatformAdmin, resolveAccountOwner, logPlatformAdminAction } from "@/lib/auth/platform-admin";
 import { toErrorResponse } from "@/lib/auth/account";
-import { supabaseAdmin } from "@/lib/billing-platform/admin-client";
+import { supabaseAdmin } from "@/lib/supabase/admin-client";
 import { checkRateLimit, rateLimitResponse, RATE_LIMITS } from "@/lib/rate-limit";
 
 /**
  * GET/PUT /api/platform-admin/accounts/[accountId]/landing —
  * staff-only read/write of any account's `landing_pages` row, always
- * saving with tier='premium' (this route only exists so Zentro's
+ * saving with tier='premium' (this route only exists so Zuhma's
  * design team can fulfil the "Landing de especialidad" line item on
  * Starter/Pro — see puck-config.tsx's fullConfig comment). Bypasses
  * the `landing_pages` RLS policies entirely via the service-role

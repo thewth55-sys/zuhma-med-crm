@@ -3,13 +3,12 @@
 // Resend — table-based layout (email-client-safe, no flexbox/grid),
 // inline styles only (many clients strip <style> blocks).
 //
-// ZENTRO_GREEN/ZENTRO_GREEN_DARK are the real brand colors, the same
-// ones pdf-theme.ts uses (hand-derived from globals.css's OKLCH
-// theme values earlier this session).
+// ZUHMA_CORAL/ZUHMA_CORAL_DARK are the real brand colors, the same
+// ones pdf-theme.ts uses (Zuhma's primary coral, #F94B5A).
 // ============================================================
 
-const ZENTRO_GREEN = "#4ade5a";
-const ZENTRO_GREEN_DARK = "#1b5a2e";
+const ZUHMA_CORAL = "#f94b5a";
+const ZUHMA_CORAL_DARK = "#a83240";
 
 /**
  * Escapes the 5 characters HTML gives special meaning, for any
@@ -35,13 +34,13 @@ export interface BrandedEmailParams {
   heading: string;
   /** Pre-escaped/trusted HTML for the body content — paragraphs, a button, etc. */
   bodyHtml: string;
-  /** "Zentro Med" for the app's own emails, or a clinic's name for patient-facing documents. */
+  /** "Zuhma Med CRM" for the app's own emails, or a clinic's name for patient-facing documents. */
   brandName: string;
-  /** Clinic's own logo for patient-facing emails; omit to fall back to Zentro's isotipo. */
+  /** Clinic's own logo for patient-facing emails; omit to fall back to Zuhma's isotipo. */
   logoUrl?: string | null;
-  /** Clinic's own accent color; falls back to Zentro's real green. */
+  /** Clinic's own accent color; falls back to Zuhma's real green. */
   accentColor?: string | null;
-  /** Small print at the very bottom, e.g. "Enviado por Clínica X vía Zentro Med". */
+  /** Small print at the very bottom, e.g. "Enviado por Clínica X vía Zuhma Med CRM". */
   footerNote?: string;
 }
 
@@ -51,8 +50,8 @@ export interface BrandedEmailParams {
  * only owns the header/footer chrome, not rich content styling.
  */
 export function renderBrandedEmail(params: BrandedEmailParams): string {
-  const accent = params.accentColor || ZENTRO_GREEN;
-  const logo = params.logoUrl || "https://med.zentrolabs.com/zentro-isotipo.png";
+  const accent = params.accentColor || ZUHMA_CORAL;
+  const logo = params.logoUrl || "https://app.zuhma.com/zentro-isotipo.png";
 
   return `<!DOCTYPE html>
 <html lang="es">
@@ -75,7 +74,7 @@ export function renderBrandedEmail(params: BrandedEmailParams): string {
                     <td style="vertical-align:middle;">
                       <img src="${logo}" width="32" height="32" alt="" style="display:block; border-radius:6px;" />
                     </td>
-                    <td style="vertical-align:middle; padding-left:10px; font-size:15px; font-weight:700; color:${ZENTRO_GREEN_DARK};">
+                    <td style="vertical-align:middle; padding-left:10px; font-size:15px; font-weight:700; color:${ZUHMA_CORAL_DARK};">
                       ${params.brandName}
                     </td>
                   </tr>
@@ -107,6 +106,6 @@ export function renderBrandedEmail(params: BrandedEmailParams): string {
 
 /** Small helper for a call-to-action button matching the app's button style. */
 export function emailButton(label: string, href: string, accentColor?: string | null): string {
-  const accent = accentColor || ZENTRO_GREEN;
-  return `<a href="${href}" style="display:inline-block; margin-top:12px; padding:10px 20px; background-color:${accent}; color:${ZENTRO_GREEN_DARK}; font-weight:700; font-size:14px; text-decoration:none; border-radius:6px;">${label}</a>`;
+  const accent = accentColor || ZUHMA_CORAL;
+  return `<a href="${href}" style="display:inline-block; margin-top:12px; padding:10px 20px; background-color:${accent}; color:${ZUHMA_CORAL_DARK}; font-weight:700; font-size:14px; text-decoration:none; border-radius:6px;">${label}</a>`;
 }

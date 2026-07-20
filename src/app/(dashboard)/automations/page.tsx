@@ -43,7 +43,6 @@ import {
 import { AUTOMATION_TEMPLATES, type TemplateSlug } from "@/lib/automations/templates"
 import { triggerMeta, formatRelative } from "@/lib/automations/trigger-meta"
 import { cn } from "@/lib/utils"
-import { PlanGate } from "@/components/billing-platform/plan-gate"
 
 const TEMPLATE_ORDER: TemplateSlug[] = [
   "welcome_message",
@@ -160,7 +159,6 @@ export default function AutomationsPage() {
   const showTemplates = automations.length < 3
 
   return (
-    <PlanGate feature="automations" featureLabel="Automatizaciones y Flows">
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
@@ -260,7 +258,6 @@ export default function AutomationsPage() {
         </DialogContent>
       </Dialog>
     </div>
-    </PlanGate>
   )
 }
 

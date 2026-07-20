@@ -16,7 +16,7 @@
 
 import { NextResponse } from "next/server";
 
-import { supabaseAdmin } from "@/lib/billing-platform/admin-client";
+import { supabaseAdmin } from "@/lib/supabase/admin-client";
 import { timingSafeSecretEqual } from "@/lib/cron/verify-secret";
 import { sendEmail } from "@/lib/email/resend-client";
 import { renderBrandedEmail, escapeHtml } from "@/lib/email/branded-template";
@@ -70,13 +70,13 @@ export async function POST(request: Request) {
   const accountName = typeof record.name === "string" ? record.name : "Cuenta nueva";
 
   const bodyHtml = `
-    <p>Se registró una cuenta nueva en Zentro Med.</p>
+    <p>Se registró una cuenta nueva en Zuhma Med CRM.</p>
     <table style="width:100%;font-size:14px;margin:16px 0;">
       <tr><td style="color:#666;padding:4px 0;">Cuenta</td><td style="padding:4px 0;"><strong>${escapeHtml(accountName)}</strong></td></tr>
       <tr><td style="color:#666;padding:4px 0;">Dueño</td><td style="padding:4px 0;">${escapeHtml(ownerEmail ?? "—")}</td></tr>
       <tr><td style="color:#666;padding:4px 0;">Plan</td><td style="padding:4px 0;">${escapeHtml(planLabel)}</td></tr>
     </table>
-    <p><a href="https://med.zentrolabs.com/admin/accounts/${escapeHtml(record.id)}">Ver en el panel de admin →</a></p>
+    <p><a href="https://app.zuhma.com/admin/accounts/${escapeHtml(record.id)}">Ver en el panel de admin →</a></p>
   `;
 
   try {
@@ -86,7 +86,7 @@ export async function POST(request: Request) {
       html: renderBrandedEmail({
         heading: "Nueva cuenta registrada",
         bodyHtml,
-        brandName: "Zentro Med",
+        brandName: "Zuhma Med CRM",
       }),
     });
   } catch (err) {

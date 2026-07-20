@@ -2,7 +2,6 @@
 
 import { useTranslations } from 'next-intl';
 
-import { PlanGate } from '@/components/billing-platform/plan-gate';
 import { LandingPageEditor } from '@/components/settings/landing-page-editor';
 
 /**
@@ -15,14 +14,12 @@ export default function LandingPage() {
   const t = useTranslations('Settings.landing');
 
   return (
-    <PlanGate feature="landing_builder" featureLabel={t('title')}>
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">{t('title')}</h1>
-          <p className="mt-1 text-sm text-muted-foreground">{t('description')}</p>
-        </div>
-        <LandingPageEditor />
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">{t('title')}</h1>
+        <p className="mt-1 text-sm text-muted-foreground">{t('description')}</p>
       </div>
-    </PlanGate>
+      <LandingPageEditor />
+    </div>
   );
 }

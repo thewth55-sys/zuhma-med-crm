@@ -1,16 +1,15 @@
 // ============================================================
 // GET /api/platform-admin/accounts/[accountId] — the "Cuenta 360"
-// detail feed: account/plan info, internal team members, and Stripe
-// payment history. Same service-role + requirePlatformAdmin() gate
-// as every other /api/platform-admin/** route.
+// detail feed: account/plan info and internal team members. Same
+// service-role + requirePlatformAdmin() gate as every other
+// /api/platform-admin/** route.
 // ============================================================
 
 import { NextResponse } from "next/server";
 
 import { requirePlatformAdmin } from "@/lib/auth/platform-admin";
 import { toErrorResponse } from "@/lib/auth/account";
-import { supabaseAdmin } from "@/lib/billing-platform/admin-client";
-import { getStripeClient } from "@/lib/billing-platform/stripe";
+import { supabaseAdmin } from "@/lib/supabase/admin-client";
 import { getAiTokenQuotaStatus } from "@/lib/ai/quota";
 
 export async function GET(_request: Request, { params }: { params: Promise<{ accountId: string }> }) {
@@ -23,7 +22,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ acc
     const { data: account, error: accountErr } = await db
       .from("accounts")
       .select(
-        "id, name, owner_user_id, plan, subscription_status, trial_ends_at, included_seats, stripe_customer_id, stripe_subscription_id, created_at, feature_overrides, logo_url, ai_access_blocked, ai_token_limit_override",
+        "id, name, owner_user_id, plan, subscription_status, trial_ends_at, included_seats, created_at, logo_url, ai_access_blocked, ai_token_limit_override",
       )
       .eq("id", accountId)
       .maybeSingle();
@@ -78,40 +77,6 @@ export async function GET(_request: Request, { params }: { params: Promise<{ acc
       .eq("account_id", accountId)
       .order("created_at", { ascending: false })
       .limit(5);
-
-    let payments: {
-      id: string;
-      status: string;
-      amountDue: number;
-      amountPaid: number;
-      currency: string;
-      created: number;
-      description: string | null;
-      hostedInvoiceUrl: string | null;
-    }[] = [];
-
-    if (account.stripe_customer_id) {
-      try {
-        const stripe = getStripeClient();
-        const list = await stripe.invoices.list({ customer: account.stripe_customer_id, limit: 12 });
-        payments = list.data
-          .filter((inv) => inv.status !== "draft")
-          .map((inv) => ({
-            id: inv.id ?? "",
-            status: inv.status ?? "unknown",
-            amountDue: inv.amount_due,
-            amountPaid: inv.amount_paid,
-            currency: inv.currency,
-            created: inv.created,
-            description: inv.lines.data[0]?.description ?? null,
-            hostedInvoiceUrl: inv.hosted_invoice_url ?? null,
-          }));
-      } catch (stripeErr) {
-        // Stripe outage/misconfig shouldn't 500 the whole detail page —
-        // the rest of the account panel is still useful without it.
-        console.error("[GET /api/platform-admin/accounts/:id] stripe fetch error:", stripeErr);
-      }
-    }
 
     const { data: tags, error: tagsErr } = await db
       .from("account_tags")
@@ -168,10 +133,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ acc
         subscriptionStatus: account.subscription_status,
         trialEndsAt: account.trial_ends_at,
         includedSeats: account.included_seats,
-        hasStripeCustomer: !!account.stripe_customer_id,
-        hasStripeSubscription: !!account.stripe_subscription_id,
         createdAt: account.created_at,
-        featureOverrides: account.feature_overrides ?? {},
         logoUrl: account.logo_url,
         aiAccessBlocked: account.ai_access_blocked,
         aiTokenLimitOverride: account.ai_token_limit_override,
@@ -192,7 +154,6 @@ export async function GET(_request: Request, { params }: { params: Promise<{ acc
         role: m.account_role,
         avatarUrl: m.avatar_url,
       })),
-      payments,
       integrations: {
         ai: aiConfig
           ? {

@@ -15,16 +15,16 @@ import { STRUCTURED_DATA, LANDING_BODY_HTML, LANDING_BEHAVIOR_SCRIPT } from "./l
 // the whole app (it's a private CRM). This page overrides that here,
 // same as "/".
 export const metadata: Metadata = {
-  // Root layout.tsx's title template ("%s — Zentro Med") applies to
+  // Root layout.tsx's title template ("%s — Zuhma Med CRM") applies to
   // this page (it's a nested segment, unlike the root "/" page.tsx,
   // which Next.js exempts from its own layout's template) — so this
-  // is deliberately NOT prefixed with "Zentro Med" like "/"'s title
+  // is deliberately NOT prefixed with "Zuhma Med CRM" like "/"'s title
   // is, to avoid it appearing twice in the rendered <title>.
   title: "Más pacientes. Sin caos administrativo.",
   description:
     "CRM de WhatsApp con IA para consultorios y clínicas en Latinoamérica: agenda online 24/7, seguimiento y reactivación de pacientes. Marketing gestionado disponible como upgrade. Prueba 30 días gratis, sin tarjeta.",
   robots: { index: true, follow: true },
-  alternates: { canonical: "https://med.zentrolabs.com/crm" },
+  alternates: { canonical: "https://app.zuhma.com/crm" },
 };
 
 export default function CrmLandingPage() {

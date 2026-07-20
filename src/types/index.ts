@@ -401,7 +401,7 @@ export interface Deal {
 export interface Doctor {
   id: string;
   account_id: string;
-  /** Nullable — a doctor doesn't need a Zentro Med login to be assignable. */
+  /** Nullable — a doctor doesn't need a Zuhma Med CRM login to be assignable. */
   user_id: string | null;
   name: string;
   specialty?: string | null;
@@ -523,36 +523,6 @@ export interface ClinicalNote {
   created_at: string;
   doctor?: Doctor;
   addenda?: ClinicalNoteAddendum[];
-}
-
-// ============================================================
-// Odontogram (migration 066) — current per-tooth status for a
-// converted patient (keyed off patient_profile_id, same as
-// clinical_notes). FDI/ISO two-digit tooth numbering (11-18, 21-28,
-// 31-38, 41-48 — permanent adult dentition only in this version).
-// ============================================================
-
-export type ToothCondition =
-  | 'healthy'
-  | 'caries'
-  | 'filled'
-  | 'crown'
-  | 'root_canal'
-  | 'missing'
-  | 'extraction_planned'
-  | 'implant'
-  | 'bridge';
-
-export interface OdontogramTooth {
-  id: string;
-  account_id: string;
-  patient_profile_id: string;
-  tooth_number: number;
-  condition: ToothCondition;
-  notes?: string | null;
-  updated_by?: string | null;
-  created_at: string;
-  updated_at: string;
 }
 
 // ============================================================

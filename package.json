@@ -1,17 +1,16 @@
 {
-  "name": "zentro-med",
+  "name": "zuhma-med-crm",
   "version": "0.1.0",
   "private": true,
-  "description": "Zentro Med — CRM/EHR médico multi-tenant para clínicas, con agenda, expediente clínico, facturación y bandeja de WhatsApp nativa.",
+  "description": "Zuhma Med CRM — CRM/EHR médico multi-tenant para clínicas, con agenda, expediente clínico, facturación y bandeja de WhatsApp nativa.",
   "license": "MIT",
-  "author": "Arnas Donauskas",
-  "homepage": "https://github.com/thewth55-sys/zentro-med",
+  "homepage": "https://github.com/thewth55-sys/zuhma-med-crm",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/thewth55-sys/zentro-med.git"
+    "url": "git+https://github.com/thewth55-sys/zuhma-med-crm.git"
   },
   "bugs": {
-    "url": "https://github.com/thewth55-sys/zentro-med/issues"
+    "url": "https://github.com/thewth55-sys/zuhma-med-crm/issues"
   },
   "keywords": [
     "crm",

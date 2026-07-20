@@ -11,7 +11,6 @@ import { usePlatformAdmin } from "@/hooks/use-platform-admin";
 import {
   CalendarClock,
   Crown,
-  Lock,
   LogOut,
   Settings,
   Shield,
@@ -23,8 +22,6 @@ import {
 } from "lucide-react";
 import type { AccountRole } from "@/lib/auth/roles";
 import { navItems, applyNavOrder } from "@/lib/nav-items";
-import { useHasFeature } from "@/hooks/use-has-feature";
-import type { GatedFeature } from "@/lib/billing-platform/features";
 
 // Per-role chip metadata used in the sidebar's account strip + the
 // Members tab roster. Keeping this near both consumers in a single
@@ -97,16 +94,6 @@ export function Sidebar({ open = false, onClose }: SidebarProps) {
   const unreadNotifications = useUnreadNotifications();
   const { isPlatformAdmin } = usePlatformAdmin();
   const orderedNavItems = applyNavOrder(navItems, profile?.nav_order);
-  // Called at the top level rather than per-item inside the map below,
-  // since hooks can't be called conditionally/in a loop — one call per
-  // distinct gated feature in lib/billing-platform/features.ts.
-  const featureAccess: Record<GatedFeature, boolean> = {
-    automations: useHasFeature("automations"),
-    ai_autoreply: useHasFeature("ai_autoreply"),
-    whatsapp_inbox: useHasFeature("whatsapp_inbox"),
-    broadcasts: useHasFeature("broadcasts"),
-    landing_builder: useHasFeature("landing_builder"),
-  };
   // Only surface the account-name strip when it actually carries
   // information. A solo user's personal account is named after them
   // (the 017 signup trigger seeds it from `full_name`), so showing it
@@ -177,7 +164,7 @@ export function Sidebar({ open = false, onClose }: SidebarProps) {
         <div className="flex h-14 shrink-0 items-center justify-between gap-2 border-b border-border px-4">
           <Link href="/dashboard" className="flex items-center gap-2">
             {/* White-labeled per account when logo_url is set (Settings →
-                Overview) — falls back to the Zentro Med isotipo otherwise. */}
+                Overview) — falls back to the Zuhma isotipo otherwise. */}
             {/* eslint-disable-next-line @next/next/no-img-element -- account-controlled upload, arbitrary remote host */}
             <img
               src={account?.logo_url || "/zentro-isotipo.png"}
@@ -218,8 +205,6 @@ export function Sidebar({ open = false, onClose }: SidebarProps) {
               const showNotificationBadge =
                 item.href === "/notifications" && unreadNotifications > 0;
 
-              const isLocked = item.feature ? !featureAccess[item.feature] : false;
-
               return (
                 <li key={item.href}>
                   <Link
@@ -234,7 +219,6 @@ export function Sidebar({ open = false, onClose }: SidebarProps) {
                   >
                     <item.icon className="h-4 w-4" />
                     <span className="flex-1">{t(item.labelKey as string)}</span>
-                    {isLocked && <Lock className="size-3.5 shrink-0 text-muted-foreground/60" />}
                     {item.beta && (
                       <span
                         aria-label={t("beta")}

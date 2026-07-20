@@ -2,9 +2,11 @@
 
 // ============================================================
 // AccountDetailPanel — the "Cuenta 360" body for /admin/accounts/[id].
-// Fetches /api/platform-admin/accounts/[id] and renders plan info,
-// internal team members, and Stripe payment history, plus the same
-// AccountActionsMenu used in the accounts table.
+// Fetches /api/platform-admin/accounts/[id] and renders plan info and
+// internal team members, plus the same AccountActionsMenu used in the
+// accounts table. Stripe payment history was removed along with the
+// billing-platform Stripe integration — this fork has no billing of
+// its own.
 // ============================================================
 
 import { useEffect, useState } from "react";
@@ -12,15 +14,12 @@ import { toast } from "sonner";
 import {
   AlertTriangle,
   Bot,
-  CreditCard,
   Laptop,
-  Lock,
   Loader2,
   Notebook,
   Plug,
   Plus,
   ShieldCheck,
-  Ticket,
   Users,
   X,
 } from "lucide-react";
@@ -39,13 +38,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AccountActionsMenu } from "@/components/admin/account-actions-menu";
-import type { Plan, SubscriptionStatus } from "@/lib/billing-platform/plans";
-import {
-  GATED_FEATURES,
-  FEATURE_LABEL,
-  resolveFeatureAccess,
-  type FeatureOverrides,
-} from "@/lib/billing-platform/features";
+import type { Plan, SubscriptionStatus } from "@/lib/accounts/plans";
 
 interface AccountDetail {
   id: string;
@@ -55,10 +48,7 @@ interface AccountDetail {
   subscriptionStatus: SubscriptionStatus;
   trialEndsAt: string;
   includedSeats: number;
-  hasStripeCustomer: boolean;
-  hasStripeSubscription: boolean;
   createdAt: string;
-  featureOverrides: FeatureOverrides;
   logoUrl: string | null;
   aiAccessBlocked: boolean;
   aiTokenLimitOverride: number | null;
@@ -79,13 +69,6 @@ interface IntegrationError {
   createdAt: string;
 }
 
-interface CouponOption {
-  id: string;
-  code: string;
-  description: string | null;
-  active: boolean;
-}
-
 interface Member {
   userId: string;
   fullName: string | null;
@@ -93,17 +76,6 @@ interface Member {
   phone: string | null;
   role: string;
   avatarUrl: string | null;
-}
-
-interface Payment {
-  id: string;
-  status: string;
-  amountDue: number;
-  amountPaid: number;
-  currency: string;
-  created: number;
-  description: string | null;
-  hostedInvoiceUrl: string | null;
 }
 
 interface Integrations {
@@ -192,23 +164,9 @@ const ERROR_SOURCE_LABEL: Record<IntegrationError["source"], string> = {
   ai_auto_reply: "Auto-respuesta IA",
 };
 
-const PAYMENT_STATUS_LABEL: Record<string, string> = {
-  paid: "Pagado",
-  open: "Pendiente",
-  uncollectible: "Rechazado",
-  void: "Anulado",
-};
-
-function formatMoney(cents: number, currency: string) {
-  return new Intl.NumberFormat("es-MX", { style: "currency", currency: currency.toUpperCase() }).format(
-    cents / 100,
-  );
-}
-
 export function AccountDetailPanel({ accountId }: { accountId: string }) {
   const [account, setAccount] = useState<AccountDetail | null>(null);
   const [members, setMembers] = useState<Member[]>([]);
-  const [payments, setPayments] = useState<Payment[]>([]);
   const [tags, setTags] = useState<Tag[]>([]);
   const [notes, setNotes] = useState<Note[]>([]);
   const [integrations, setIntegrations] = useState<Integrations | null>(null);
@@ -217,16 +175,12 @@ export function AccountDetailPanel({ accountId }: { accountId: string }) {
   const [recentErrors, setRecentErrors] = useState<IntegrationError[]>([]);
   const [tokenLimitDraft, setTokenLimitDraft] = useState("");
   const [savingAiQuota, setSavingAiQuota] = useState(false);
-  const [coupons, setCoupons] = useState<CouponOption[]>([]);
-  const [selectedCouponId, setSelectedCouponId] = useState("");
-  const [applyingCoupon, setApplyingCoupon] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const [newTag, setNewTag] = useState("");
   const [addingTag, setAddingTag] = useState(false);
   const [newNote, setNewNote] = useState("");
   const [addingNote, setAddingNote] = useState(false);
-  const [savingFeature, setSavingFeature] = useState<string | null>(null);
   const [editingMember, setEditingMember] = useState<Member | null>(null);
   const [editEmail, setEditEmail] = useState("");
   const [editPhone, setEditPhone] = useState("");
@@ -271,7 +225,6 @@ export function AccountDetailPanel({ accountId }: { accountId: string }) {
       if (!res.ok) throw new Error(body?.error ?? "No se pudo cargar la cuenta");
       setAccount(body.account);
       setMembers(body.members);
-      setPayments(body.payments);
       setTags(body.tags ?? []);
       setNotes(body.notes ?? []);
       setIntegrations(body.integrations ?? null);
@@ -290,33 +243,6 @@ export function AccountDetailPanel({ accountId }: { accountId: string }) {
     void load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [accountId]);
-
-  useEffect(() => {
-    fetch("/api/platform-admin/coupons", { cache: "no-store" })
-      .then((res) => res.json())
-      .then((body) => setCoupons(((body.coupons ?? []) as CouponOption[]).filter((c) => c.active)))
-      .catch(() => {});
-  }, []);
-
-  async function handleApplyCoupon() {
-    if (!selectedCouponId) return;
-    setApplyingCoupon(true);
-    try {
-      const res = await fetch(`/api/platform-admin/accounts/${accountId}/apply-coupon`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ couponId: selectedCouponId }),
-      });
-      const body = await res.json().catch(() => null);
-      if (!res.ok) throw new Error(body?.error ?? "No se pudo aplicar el cupón");
-      toast.success("Cupón aplicado a la suscripción");
-      setSelectedCouponId("");
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "No se pudo aplicar el cupón");
-    } finally {
-      setApplyingCoupon(false);
-    }
-  }
 
   async function handleAddTag() {
     const label = newTag.trim();
@@ -370,24 +296,6 @@ export function AccountDetailPanel({ accountId }: { accountId: string }) {
       toast.error(err instanceof Error ? err.message : "No se pudo agregar la nota");
     } finally {
       setAddingNote(false);
-    }
-  }
-
-  async function handleSetFeatureOverride(feature: string, enabled: boolean | null) {
-    setSavingFeature(feature);
-    try {
-      const res = await fetch(`/api/platform-admin/accounts/${accountId}/feature-overrides`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ feature, enabled }),
-      });
-      const body = await res.json().catch(() => null);
-      if (!res.ok) throw new Error(body?.error ?? "No se pudo actualizar");
-      setAccount((prev) => (prev ? { ...prev, featureOverrides: body.featureOverrides } : prev));
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "No se pudo actualizar");
-    } finally {
-      setSavingFeature(null);
     }
   }
 
@@ -654,7 +562,6 @@ export function AccountDetailPanel({ accountId }: { accountId: string }) {
           accountId={account.id}
           accountName={account.name}
           ownerEmail={owner?.email ?? null}
-          plan={account.plan}
           subscriptionStatus={account.subscriptionStatus}
           onChanged={load}
         />
@@ -679,127 +586,53 @@ export function AccountDetailPanel({ accountId }: { accountId: string }) {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
-        <div className="rounded-lg border border-border p-4">
-          <div className="mb-3 flex items-center gap-2 text-sm font-medium text-foreground">
-            <CreditCard className="size-4" /> Pagos recientes
-          </div>
-          {!account.hasStripeCustomer ? (
-            <p className="text-sm text-muted-foreground">Sin cliente de Stripe asociado.</p>
-          ) : payments.length === 0 ? (
-            <p className="text-sm text-muted-foreground">Todavía no hay facturas.</p>
-          ) : (
-            <div className="space-y-2">
-              {payments.map((payment) => (
-                <div key={payment.id} className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">
-                    {new Date(payment.created * 1000).toLocaleDateString()}
-                  </span>
-                  <a
-                    href={payment.hostedInvoiceUrl ?? undefined}
-                    target="_blank"
-                    rel="noreferrer"
-                    className={
-                      payment.status === "paid"
-                        ? "text-foreground hover:underline"
-                        : "text-destructive hover:underline"
-                    }
-                  >
-                    {PAYMENT_STATUS_LABEL[payment.status] ?? payment.status} —{" "}
-                    {formatMoney(payment.status === "paid" ? payment.amountPaid : payment.amountDue, payment.currency)}
-                  </a>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        <div className="rounded-lg border border-border p-4">
-          <div className="mb-3 flex items-center gap-2 text-sm font-medium text-foreground">
-            <Users className="size-4" /> Usuarios internos
-          </div>
-          <div className="space-y-3">
-            {members.map((member) => (
-              <div key={member.userId} className="flex items-center justify-between text-sm">
-                <div className="flex items-center gap-2.5 min-w-0">
-                  <Avatar size="sm">
-                    <AvatarImage src={member.avatarUrl ?? undefined} alt={member.fullName ?? ""} />
-                    <AvatarFallback>{(member.fullName ?? member.email ?? "?").slice(0, 2).toUpperCase()}</AvatarFallback>
-                  </Avatar>
-                  <div className="min-w-0">
-                    <div className="truncate text-foreground">{member.fullName ?? member.email ?? "—"}</div>
-                    <div className="truncate text-xs text-muted-foreground">
-                      {member.email ?? "—"}
-                      {member.phone ? ` · ${member.phone}` : ""}
-                    </div>
-                  </div>
-                </div>
-                <div className="flex shrink-0 items-center gap-2">
-                  <span className="text-muted-foreground">{ROLE_LABEL[member.role] ?? member.role}</span>
-                  <button
-                    type="button"
-                    onClick={() => openEditMember(member)}
-                    className="text-xs text-accent-foreground underline decoration-dotted hover:text-foreground"
-                  >
-                    Editar
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setRevokeTarget(member)}
-                    className="text-xs text-destructive underline decoration-dotted hover:text-destructive/80"
-                  >
-                    Cerrar sesión
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => openHistory(member)}
-                    className="text-xs text-muted-foreground underline decoration-dotted hover:text-foreground"
-                  >
-                    Historial
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
       <div className="rounded-lg border border-border p-4">
         <div className="mb-3 flex items-center gap-2 text-sm font-medium text-foreground">
-          <Ticket className="size-4" /> Aplicar cupón de descuento
+          <Users className="size-4" /> Usuarios internos
         </div>
-        {!account.hasStripeSubscription ? (
-          <p className="text-sm text-muted-foreground">
-            Esta cuenta no tiene una suscripción de Stripe activa — usa &ldquo;Establecer plan&rdquo; para
-            una cortesía completa en su lugar.
-          </p>
-        ) : (
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-            <Select value={selectedCouponId} onValueChange={(v) => setSelectedCouponId(v ?? "")}>
-              <SelectTrigger className="sm:w-64">
-                <SelectValue placeholder="Elige un cupón activo" />
-              </SelectTrigger>
-              <SelectContent>
-                {coupons.length === 0 ? (
-                  <SelectItem value="__none" disabled>
-                    No hay cupones activos
-                  </SelectItem>
-                ) : (
-                  coupons.map((c) => (
-                    <SelectItem key={c.id} value={c.id}>
-                      {c.code}
-                      {c.description ? ` — ${c.description}` : ""}
-                    </SelectItem>
-                  ))
-                )}
-              </SelectContent>
-            </Select>
-            <Button size="sm" disabled={!selectedCouponId || applyingCoupon} onClick={handleApplyCoupon}>
-              {applyingCoupon ? <Loader2 className="size-4 animate-spin" /> : null}
-              Aplicar a esta cuenta
-            </Button>
-          </div>
-        )}
+        <div className="space-y-3">
+          {members.map((member) => (
+            <div key={member.userId} className="flex items-center justify-between text-sm">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <Avatar size="sm">
+                  <AvatarImage src={member.avatarUrl ?? undefined} alt={member.fullName ?? ""} />
+                  <AvatarFallback>{(member.fullName ?? member.email ?? "?").slice(0, 2).toUpperCase()}</AvatarFallback>
+                </Avatar>
+                <div className="min-w-0">
+                  <div className="truncate text-foreground">{member.fullName ?? member.email ?? "—"}</div>
+                  <div className="truncate text-xs text-muted-foreground">
+                    {member.email ?? "—"}
+                    {member.phone ? ` · ${member.phone}` : ""}
+                  </div>
+                </div>
+              </div>
+              <div className="flex shrink-0 items-center gap-2">
+                <span className="text-muted-foreground">{ROLE_LABEL[member.role] ?? member.role}</span>
+                <button
+                  type="button"
+                  onClick={() => openEditMember(member)}
+                  className="text-xs text-accent-foreground underline decoration-dotted hover:text-foreground"
+                >
+                  Editar
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setRevokeTarget(member)}
+                  className="text-xs text-destructive underline decoration-dotted hover:text-destructive/80"
+                >
+                  Cerrar sesión
+                </button>
+                <button
+                  type="button"
+                  onClick={() => openHistory(member)}
+                  className="text-xs text-muted-foreground underline decoration-dotted hover:text-foreground"
+                >
+                  Historial
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
 
       <Dialog open={!!editingMember} onOpenChange={(open) => !open && setEditingMember(null)}>
@@ -1271,53 +1104,6 @@ export function AccountDetailPanel({ accountId }: { accountId: string }) {
             ))}
           </ul>
         )}
-      </div>
-
-      <div className="rounded-lg border border-border p-4">
-        <div className="mb-3 flex items-center gap-2 text-sm font-medium text-foreground">
-          <Lock className="size-4" /> Funciones de la cuenta
-        </div>
-        <div className="space-y-2 text-sm">
-          {GATED_FEATURES.map((feature) => {
-            const isOverridden = account.featureOverrides[feature] !== undefined;
-            const effective = resolveFeatureAccess(account.plan, feature, account.featureOverrides);
-            const saving = savingFeature === feature;
-            return (
-              <div key={feature} className="flex items-center justify-between">
-                <span className="text-foreground">{FEATURE_LABEL[feature]}</span>
-                <div className="flex items-center gap-2">
-                  {isOverridden && (
-                    <button
-                      type="button"
-                      className="text-xs text-muted-foreground hover:text-foreground hover:underline"
-                      onClick={() => handleSetFeatureOverride(feature, null)}
-                      disabled={saving}
-                    >
-                      Usar el del plan
-                    </button>
-                  )}
-                  <button
-                    type="button"
-                    onClick={() => handleSetFeatureOverride(feature, !effective)}
-                    disabled={saving}
-                    className={
-                      "rounded-full px-2.5 py-0.5 text-xs " +
-                      (effective
-                        ? "bg-green-100 text-green-800 dark:bg-green-950 dark:text-green-300"
-                        : "bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300")
-                    }
-                  >
-                    {saving ? "…" : effective ? "Activo" : "Bloqueado"}
-                  </button>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-        <p className="mt-3 text-xs text-muted-foreground">
-          Un bloqueo aquí anula el plan, pero solo oculta la función en la interfaz — no bloquea llamadas
-          directas a la API todavía.
-        </p>
       </div>
 
       <div className="rounded-lg border border-border p-4">

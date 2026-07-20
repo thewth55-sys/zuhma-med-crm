@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { supabaseAdmin } from "@/lib/billing-platform/admin-client";
+import { supabaseAdmin } from "@/lib/supabase/admin-client";
 import { findExistingContact, isUniqueViolation } from "@/lib/contacts/dedupe";
 import { normalizePhone } from "@/lib/whatsapp/phone-utils";
 import { computeAvailableSlots } from "@/lib/scheduling/public-booking";

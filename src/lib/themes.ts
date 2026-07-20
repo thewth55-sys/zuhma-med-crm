@@ -14,7 +14,7 @@
  */
 
 export const THEME_IDS = [
-  "zentro",
+  "zuhma",
   "violet",
   "emerald",
   "cobalt",
@@ -24,9 +24,9 @@ export const THEME_IDS = [
 
 export type ThemeId = (typeof THEME_IDS)[number];
 
-export const DEFAULT_THEME: ThemeId = "zentro";
+export const DEFAULT_THEME: ThemeId = "zuhma";
 
-export const STORAGE_KEY = "zentro-med.theme";
+export const STORAGE_KEY = "zuhma-med-crm.theme";
 
 /**
  * MODE — the light/dark dimension, orthogonal to the accent theme.
@@ -46,7 +46,7 @@ export type Mode = (typeof MODES)[number];
 
 export const DEFAULT_MODE: Mode = "light";
 
-export const MODE_STORAGE_KEY = "zentro-med.mode";
+export const MODE_STORAGE_KEY = "zuhma-med-crm.mode";
 
 export function isMode(value: unknown): value is Mode {
   return (
@@ -69,10 +69,10 @@ export interface ThemeMeta {
 
 export const THEMES: ReadonlyArray<ThemeMeta> = [
   {
-    id: "zentro",
-    name: "Zentro",
-    tagline: "The brand default — straight from the Zentro Labs identity.",
-    swatch: "oklch(0.795 0.214 144.9)",
+    id: "zuhma",
+    name: "Zuhma",
+    tagline: "The brand default — straight from the Zuhma identity.",
+    swatch: "oklch(0.663 0.211 20.1)",
   },
   {
     id: "violet",

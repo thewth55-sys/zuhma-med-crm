@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import type { Data } from "@puckeditor/core";
 import { Render } from "@puckeditor/core/rsc";
 
-import { supabaseAdmin } from "@/lib/billing-platform/admin-client";
+import { supabaseAdmin } from "@/lib/supabase/admin-client";
 import { fullConfig, type LandingProps } from "@/lib/landing-builder/puck-config";
 
 /**

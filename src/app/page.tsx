@@ -16,11 +16,11 @@ import { STRUCTURED_DATA, LANDING_BODY_HTML, LANDING_BEHAVIOR_SCRIPT } from "./l
 // the whole app (it's a private CRM). This is the one page meant to
 // be crawled, so it overrides that here.
 export const metadata: Metadata = {
-  title: "Zentro Med — Más pacientes. Sin caos administrativo.",
+  title: "Zuhma Med CRM — Más pacientes. Sin caos administrativo.",
   description:
     "CRM de gestión comercial con WhatsApp + marketing digital gestionado para consultorios y clínicas en Latinoamérica. Prueba 30 días gratis, sin tarjeta.",
   robots: { index: true, follow: true },
-  alternates: { canonical: "https://med.zentrolabs.com" },
+  alternates: { canonical: "https://app.zuhma.com" },
 };
 
 export default function LandingPage() {

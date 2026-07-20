@@ -27,7 +27,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
           >
             <Menu className="h-5 w-5" />
           </button>
-          <span className="text-sm font-semibold text-foreground">Zentro Med — Admin</span>
+          <span className="text-sm font-semibold text-foreground">Zuhma Med CRM — Admin</span>
         </header>
         <main className="flex-1 overflow-x-hidden px-4 py-6 lg:px-8 lg:py-8">{children}</main>
       </div>

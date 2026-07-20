@@ -2,9 +2,8 @@
 -- 067_visit_photos.sql — durable clinical photo history per patient.
 --
 -- Design notes
---   - Keyed off `patient_profile_id`, same reasoning as odontogram
---     (066): this is clinical data scoped to converted patients, not
---     raw WhatsApp leads.
+--   - Keyed off `patient_profile_id`: this is clinical data scoped to
+--     converted patients, not raw WhatsApp leads.
 --   - `appointment_id` is optional — a photo can be tied to the visit
 --     it was taken during, but isn't required to (kept simple for
 --     this version: staff just upload with an optional caption,
@@ -18,8 +17,7 @@
 --     the account-scoped one those other buckets use:
 --       clinical-photos/account-<account_id>/patient-<patient_profile_id>/<timestamp>-<basename>.<ext>
 --
--- RLS mirrors odontogram_teeth: any account member reads, agent+
--- writes.
+-- RLS: any account member reads, agent+ writes.
 --
 -- Idempotent — safe to run multiple times.
 -- ============================================================

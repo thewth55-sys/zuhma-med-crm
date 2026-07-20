@@ -2,7 +2,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { registerPhoneNumber, subscribeWabaToApp, verifyPhoneNumber } from "@/lib/whatsapp/meta-api";
 import { encrypt } from "@/lib/whatsapp/encryption";
-import { supabaseAdmin } from "@/lib/billing-platform/admin-client";
+import { supabaseAdmin } from "@/lib/supabase/admin-client";
 
 /**
  * The full "connect WhatsApp" orchestration — verify with Meta,
