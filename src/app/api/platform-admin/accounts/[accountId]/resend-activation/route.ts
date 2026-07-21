@@ -4,28 +4,31 @@ import { requirePlatformAdmin, resolveAccountOwner, logPlatformAdminAction } fro
 import { toErrorResponse } from "@/lib/auth/account";
 import { supabaseAdmin } from "@/lib/supabase/admin-client";
 import { checkRateLimit, rateLimitResponse, RATE_LIMITS } from "@/lib/rate-limit";
-import { renderBrandedEmail, emailButton, escapeHtml } from "@/lib/email/branded-template";
-import { sendEmail } from "@/lib/email/resend-client";
 
 /**
  * POST /api/platform-admin/accounts/[accountId]/resend-activation
  *
- * Re-sends the activation email — for an owner who never clicked their
- * original invite (spam filter, dead-domain link, typo'd retry, etc.).
+ * Re-sends an activation link to an account owner who never completed
+ * their invite (spam filter, dead-domain link, typo'd retry, etc.).
  *
- * Accounts are created with `inviteUserByEmail` (a GoTrue *invite*), so
- * the user already exists. That rules out the two mechanisms that only
- * work for brand-new users: `auth.resend({type:'signup'})` silently
- * no-ops (there's no pending *signup* confirmation for an invited user
- * — the previous bug: it logged success but never sent), and
- * `generateLink({type:'invite'})` errors "already registered".
+ * Accounts are created with `inviteUserByEmail`, so the owner already
+ * exists — which rules out every "new user" mechanism we tried before:
+ *   - `auth.resend({type:'signup'})` silently no-ops for an invited
+ *     user (no pending *signup* confirmation) — the original bug: it
+ *     logged success but never sent.
+ *   - `generateLink({type:'invite'})` errors "already registered".
+ *   - `generateLink({type:'recovery'})` DOES send, but returns an
+ *     *implicit-flow* link (`#access_token` in the URL fragment). Our
+ *     `/auth/callback` only handles the *PKCE* `?code=` exchange, so
+ *     that link can't establish a session there and bounced the owner
+ *     to `/login` with `otp_expired`.
  *
- * So we mint a **recovery** link (valid for an existing user, drops
- * them into the set-password flow at /auth/callback → /reset-password —
- * same activation outcome) and send it ourselves through Resend with
- * the branded template, instead of relying on GoTrue's SMTP for an
- * email type that wouldn't fire. `generateLink` only generates the
- * link; it does not send anything.
+ * So we use the exact path the working forgot-password page and the
+ * platform-admin "reset password" action already use:
+ * `resetPasswordForEmail()`. GoTrue sends the (Zuhma-branded) recovery
+ * email over the configured SMTP and produces a PKCE `?code=` link that
+ * `/auth/callback` exchanges, landing the owner on `/reset-password` to
+ * set their password — same activation outcome, on a proven flow.
  */
 export async function POST(
   request: Request,
@@ -49,44 +52,12 @@ export async function POST(
     const siteUrl =
       process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/+$/, "") || "https://medcrm.zuhma.online";
 
-    const { data: link, error: linkErr } = await supabaseAdmin().auth.admin.generateLink({
-      type: "recovery",
-      email: owner.ownerEmail,
-      options: {
-        redirectTo: `${siteUrl}/auth/callback?next=${encodeURIComponent("/reset-password")}`,
-      },
+    const { error: resetErr } = await supabaseAdmin().auth.resetPasswordForEmail(owner.ownerEmail, {
+      redirectTo: `${siteUrl}/auth/callback?next=${encodeURIComponent("/reset-password")}`,
     });
 
-    const actionLink = link?.properties?.action_link;
-    if (linkErr || !actionLink) {
-      return NextResponse.json(
-        { error: linkErr?.message ?? "No se pudo generar el enlace de activación" },
-        { status: 400 },
-      );
-    }
-
-    const html = renderBrandedEmail({
-      heading: "Activa tu cuenta",
-      bodyHtml:
-        `<p>Te dieron acceso a <strong>${escapeHtml(owner.accountName)}</strong> en Zuhma. ` +
-        `Activa tu cuenta y define tu contraseña para empezar.</p>` +
-        emailButton("Activar mi cuenta", actionLink) +
-        `<p style="margin-top:20px; font-size:12px; color:#999;">Si el botón no funciona, ` +
-        `copia y pega este enlace en tu navegador:<br>` +
-        `<a href="${actionLink}" style="word-break:break-all;">${actionLink}</a></p>`,
-      brandName: "Zuhma",
-    });
-
-    try {
-      await sendEmail({
-        to: owner.ownerEmail,
-        subject: "Te invitaron a unirte a Zuhma",
-        html,
-      });
-    } catch (sendErr) {
-      const message = sendErr instanceof Error ? sendErr.message : "Error enviando el correo";
-      console.error("[resend-activation] send failed:", message);
-      return NextResponse.json({ error: `No se pudo enviar el correo: ${message}` }, { status: 502 });
+    if (resetErr) {
+      return NextResponse.json({ error: resetErr.message }, { status: 400 });
     }
 
     await logPlatformAdminAction({
