@@ -66,7 +66,7 @@ export default function ResetPasswordPage() {
         <CardHeader className="items-center text-center">
           <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
             {/* eslint-disable-next-line @next/next/no-img-element -- static brand asset */}
-            <img src="/zentro-isotipo.png" alt="" className="h-7 w-7" />
+            <img src="/zuhma-isotipo.png" alt="" className="h-7 w-7" />
           </div>
           <CardTitle className="text-xl text-foreground">{t("title")}</CardTitle>
           <CardDescription className="text-muted-foreground">{t("desc")}</CardDescription>

@@ -86,7 +86,7 @@ function LoginPageInner() {
               <UsersRound className="h-6 w-6 text-primary" />
             ) : (
               // eslint-disable-next-line @next/next/no-img-element -- static brand asset
-              <img src="/zentro-isotipo.png" alt="" className="h-7 w-7" />
+              <img src="/zuhma-isotipo.png" alt="" className="h-7 w-7" />
             )}
           </div>
           <CardTitle className="text-xl text-foreground">

@@ -167,7 +167,7 @@ export function Sidebar({ open = false, onClose }: SidebarProps) {
                 Overview) — falls back to the Zuhma isotipo otherwise. */}
             {/* eslint-disable-next-line @next/next/no-img-element -- account-controlled upload, arbitrary remote host */}
             <img
-              src={account?.logo_url || "/zentro-isotipo.png"}
+              src={account?.logo_url || "/zuhma-isotipo.png"}
               alt=""
               className="h-8 w-8 object-contain"
             />
