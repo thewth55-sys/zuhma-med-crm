@@ -46,7 +46,7 @@ export async function notifyAccountTeam(
       brandName: account.name,
       logoUrl: account.logo_url,
       accentColor: account.quote_accent_color,
-      footerNote: `Notificación interna de ${account.name} en Zuhma Med CRM.`,
+      footerNote: `Notificación interna de ${account.name} en Zuhma.`,
     });
 
     await sendEmail({ to: recipients, subject: params.subject, html });

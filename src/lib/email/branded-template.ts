@@ -34,13 +34,13 @@ export interface BrandedEmailParams {
   heading: string;
   /** Pre-escaped/trusted HTML for the body content — paragraphs, a button, etc. */
   bodyHtml: string;
-  /** "Zuhma Med CRM" for the app's own emails, or a clinic's name for patient-facing documents. */
+  /** "Zuhma" for the app's own emails, or a clinic's name for patient-facing documents. */
   brandName: string;
   /** Clinic's own logo for patient-facing emails; omit to fall back to Zuhma's isotipo. */
   logoUrl?: string | null;
   /** Clinic's own accent color; falls back to Zuhma's real coral. */
   accentColor?: string | null;
-  /** Small print at the very bottom, e.g. "Enviado por Clínica X vía Zuhma Med CRM". */
+  /** Small print at the very bottom, e.g. "Enviado por Clínica X vía Zuhma". */
   footerNote?: string;
 }
 
@@ -51,7 +51,7 @@ export interface BrandedEmailParams {
  */
 export function renderBrandedEmail(params: BrandedEmailParams): string {
   const accent = params.accentColor || ZUHMA_CORAL;
-  const logo = params.logoUrl || "https://app.zuhma.com/zuhma-isotipo.png";
+  const logo = params.logoUrl || "https://medcrm.zuhma.online/zuhma-isotipo.png";
 
   return `<!DOCTYPE html>
 <html lang="es">
