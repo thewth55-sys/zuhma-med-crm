@@ -14,7 +14,6 @@ import {
   Bot,
   CalendarClock,
   GitBranch,
-  Globe,
   LayoutDashboard,
   MessageSquare,
   Radio,
@@ -48,7 +47,6 @@ export const navItems: NavItem[] = [
   { href: "/automations", labelKey: "automations", icon: Zap },
   { href: "/flows", labelKey: "flows", icon: Workflow, beta: true },
   { href: "/agents", labelKey: "aiAgents", icon: Bot },
-  { href: "/landing", labelKey: "landing", icon: Globe },
 ];
 
 /**

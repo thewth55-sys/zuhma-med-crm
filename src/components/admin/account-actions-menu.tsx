@@ -3,20 +3,16 @@
 // ============================================================
 // AccountActionsMenu — the /admin accounts table's per-row "Acciones"
 // menu. Consolidates every platform-admin action on one account:
-// impersonate, resend activation email, suspend/reactivate, reset
-// password, and manually set plan/status (covers both "cambiar nivel
-// de suscripción" and "dar cortesía" — same underlying write, see the
-// set-plan route's own comment). Every action is logged server-side
-// to platform_admin_audit_log; this component just calls the routes
-// and reports the result.
+// impersonate, resend activation email, suspend/reactivate, and reset
+// password. Every action is logged server-side to
+// platform_admin_audit_log; this component just calls the routes and
+// reports the result.
 // ============================================================
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import {
   Ban,
-  Globe,
   KeyRound,
   Loader2,
   LogIn,
@@ -70,7 +66,6 @@ export function AccountActionsMenu({
   subscriptionStatus,
   onChanged,
 }: AccountActionsMenuProps) {
-  const router = useRouter();
   const [busyAction, setBusyAction] = useState<string | null>(null);
   const [impersonateOpen, setImpersonateOpen] = useState(false);
 
@@ -183,10 +178,6 @@ export function AccountActionsMenu({
           >
             <KeyRound className="size-4" />
             Restablecer contraseña
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => router.push(`/admin/accounts/${accountId}/landing`)}>
-            <Globe className="size-4" />
-            Editar landing
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem

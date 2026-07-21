@@ -86,7 +86,6 @@
     "automations": "Automatizaciones",
     "flows": "Flujos",
     "aiAgents": "Agentes IA",
-    "landing": "Página web",
     "settings": "Ajustes",
     "beta": "Beta",
     "unreadConversations": "{count} {count, plural, =1 {conversación sin leer} other {conversaciones sin leer}}",
@@ -1579,20 +1578,6 @@
   "Settings": {
     "pageTitle": "Ajustes",
     "pageDesc": "Todo en un solo lugar — tu cuenta y tu espacio de trabajo. Elige una sección para gestionarla.",
-    "landing": {
-      "title": "Mi página web",
-      "description": "Crea una página sencilla para tu consultorio: quiénes son, qué servicios ofrecen y cómo contactarte.",
-      "publishLabel": "Publicar página",
-      "publishHint": "Mientras está apagado, la página muestra \"no encontrado\".",
-      "slugLabel": "Dirección de tu página",
-      "slugTaken": "Esa dirección ya está en uso, prueba otra.",
-      "saveError": "No se pudo guardar. Intenta de nuevo.",
-      "saved": "Guardado",
-      "contentSaved": "Contenido guardado",
-      "linkCopied": "Enlace copiado",
-      "save": "Guardar",
-      "saving": "Guardando..."
-    },
     "overview": {
       "notSetup": "Aún no configurado",
       "connected": "Conectado",
