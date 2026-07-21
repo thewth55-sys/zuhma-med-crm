@@ -28,8 +28,8 @@
 project_id = "zuhma-med-crm"
 
 [auth]
-site_url = "https://app.zuhma.com/"
-additional_redirect_urls = ["https://app.zuhma.com/**", "https://app.zuhma.com/auth/callback"]
+site_url = "https://medcrm.zuhma.online/"
+additional_redirect_urls = ["https://medcrm.zuhma.online/**", "https://medcrm.zuhma.online/auth/callback"]
 
 [auth.email]
 enable_confirmations = true
