@@ -13,8 +13,11 @@ import { useState } from "react";
 import { toast } from "sonner";
 import {
   Ban,
+  Check,
+  Copy,
   KeyRound,
   Loader2,
+  Lock,
   LogIn,
   Mail,
   MoreHorizontal,
@@ -68,6 +71,8 @@ export function AccountActionsMenu({
 }: AccountActionsMenuProps) {
   const [busyAction, setBusyAction] = useState<string | null>(null);
   const [impersonateOpen, setImpersonateOpen] = useState(false);
+  const [tempPassword, setTempPassword] = useState<string | null>(null);
+  const [tempPasswordCopied, setTempPasswordCopied] = useState(false);
 
   const isSuspended = subscriptionStatus === "suspended";
 
@@ -119,6 +124,23 @@ export function AccountActionsMenu({
       toast.success("Correo de restablecimiento de contraseña enviado");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "No se pudo enviar");
+    } finally {
+      setBusyAction(null);
+    }
+  }
+
+  async function handleSetTempPassword() {
+    const ok = window.confirm(
+      `¿Establecer una contraseña temporal para "${accountName}"? Reemplaza la contraseña actual del dueño (${ownerEmail}). Se te mostrará una sola vez para que se la compartas por un canal seguro.`,
+    );
+    if (!ok) return;
+    setBusyAction("temp-password");
+    try {
+      const data = await postJson(`/api/platform-admin/accounts/${accountId}/set-temp-password`);
+      setTempPasswordCopied(false);
+      setTempPassword(data.password);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "No se pudo establecer la contraseña");
     } finally {
       setBusyAction(null);
     }
@@ -179,6 +201,13 @@ export function AccountActionsMenu({
             <KeyRound className="size-4" />
             Restablecer contraseña
           </DropdownMenuItem>
+          <DropdownMenuItem
+            disabled={!ownerEmail || busyAction !== null}
+            onClick={handleSetTempPassword}
+          >
+            <Lock className="size-4" />
+            Establecer contraseña temporal
+          </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem
             disabled={busyAction !== null}
@@ -213,6 +242,43 @@ export function AccountActionsMenu({
               {busyAction === "impersonate" ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
               Impersonar
             </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={tempPassword !== null}
+        onOpenChange={(open) => {
+          if (!open) setTempPassword(null);
+        }}
+      >
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Contraseña temporal</DialogTitle>
+            <DialogDescription>
+              Compártela con <span className="text-foreground">{ownerEmail}</span> por un canal
+              seguro. <strong>No se vuelve a mostrar.</strong> Pídele que la cambie al iniciar
+              sesión. La acción quedó registrada en el log de auditoría (la contraseña no).
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex items-center gap-2 rounded-md border bg-muted/40 p-3">
+            <code className="flex-1 break-all font-mono text-sm">{tempPassword}</code>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={async () => {
+                if (!tempPassword) return;
+                await navigator.clipboard.writeText(tempPassword);
+                setTempPasswordCopied(true);
+                toast.success("Contraseña copiada");
+              }}
+            >
+              {tempPasswordCopied ? <Check className="size-4" /> : <Copy className="size-4" />}
+              {tempPasswordCopied ? "Copiada" : "Copiar"}
+            </Button>
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setTempPassword(null)}>Listo</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

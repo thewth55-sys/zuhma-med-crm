@@ -20,6 +20,7 @@ const ACTION_LABEL: Record<string, string> = {
   impersonate: "Impersonación iniciada",
   resend_activation: "Reenvío de correo de activación",
   reset_password: "Restablecimiento de contraseña",
+  set_temp_password: "Contraseña temporal establecida",
   edit_member_contact: "Corrección de correo/teléfono",
   revoke_member_session: "Sesión cerrada remotamente",
   set_ai_config: "Configuración de Agentes IA actualizada",

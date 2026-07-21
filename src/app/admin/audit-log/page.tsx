@@ -27,6 +27,7 @@ const ACTION_LABEL: Record<string, string> = {
   impersonate: "Impersonación",
   resend_activation: "Reenvío de activación",
   reset_password: "Restablecimiento de contraseña",
+  set_temp_password: "Contraseña temporal establecida",
   suspend: "Suspensión",
   reactivate: "Reactivación",
   set_plan: "Cambio de plan",
