@@ -47,6 +47,9 @@ const SDK_SRC = 'https://connect.facebook.net/en_US/sdk.js';
 export function WhatsAppEmbeddedSignupButton() {
   const t = useTranslations('Settings.whatsapp');
   const router = useRouter();
+  // NEXT_PUBLIC_* are inlined at build time — a rebuild is required
+  // whenever these change in the deploy environment (env-only restart
+  // keeps the previously-baked value).
   const appId = process.env.NEXT_PUBLIC_META_APP_ID;
   const configId = process.env.NEXT_PUBLIC_META_WA_SIGNUP_CONFIG_ID;
 
