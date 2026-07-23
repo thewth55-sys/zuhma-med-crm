@@ -151,6 +151,11 @@ export const RATE_LIMITS = {
    *  successful redemption mutates two profiles and an invite row, so
    *  the abuse surface is "spam join attempts." */
   invitationRedeem: { limit: 10, windowMs: 60_000 },
+  /** Account activation (public, per-IP+email). Bounds brute-forcing
+   *  the typed activation code — 10/min per email is generous for a
+   *  real user fixing a typo while making code-guessing infeasible
+   *  against the 30^8 space. */
+  activate: { limit: 10, windowMs: 60_000 },
   /** Admin-only account / member-management actions: create/revoke
    *  invitation, rename account, change member role, remove member,
    *  transfer ownership. 30/min per user is comfortably above any

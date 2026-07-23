@@ -4,31 +4,21 @@ import { requirePlatformAdmin, resolveAccountOwner, logPlatformAdminAction } fro
 import { toErrorResponse } from "@/lib/auth/account";
 import { supabaseAdmin } from "@/lib/supabase/admin-client";
 import { checkRateLimit, rateLimitResponse, RATE_LIMITS } from "@/lib/rate-limit";
+import {
+  generateActivationCode,
+  hashActivationCode,
+  activationCodeExpiryFromNow,
+} from "@/lib/auth/activation-code";
+import { sendActivationCodeEmail } from "@/lib/email/activation-email";
 
 /**
  * POST /api/platform-admin/accounts/[accountId]/resend-activation
  *
- * Re-sends an activation link to an account owner who never completed
- * their invite (spam filter, dead-domain link, typo'd retry, etc.).
- *
- * Accounts are created with `inviteUserByEmail`, so the owner already
- * exists — which rules out every "new user" mechanism we tried before:
- *   - `auth.resend({type:'signup'})` silently no-ops for an invited
- *     user (no pending *signup* confirmation) — the original bug: it
- *     logged success but never sent.
- *   - `generateLink({type:'invite'})` errors "already registered".
- *   - `generateLink({type:'recovery'})` DOES send, but returns an
- *     *implicit-flow* link (`#access_token` in the URL fragment). Our
- *     `/auth/callback` only handles the *PKCE* `?code=` exchange, so
- *     that link can't establish a session there and bounced the owner
- *     to `/login` with `otp_expired`.
- *
- * So we use the exact path the working forgot-password page and the
- * platform-admin "reset password" action already use:
- * `resetPasswordForEmail()`. GoTrue sends the (Zuhma-branded) recovery
- * email over the configured SMTP and produces a PKCE `?code=` link that
- * `/auth/callback` exchanges, landing the owner on `/reset-password` to
- * set their password — same activation outcome, on a proven flow.
+ * Re-issues the owner's activation CODE and emails it again — for an
+ * owner who never completed onboarding or whose code expired. Generates
+ * a fresh code (invalidating any previous one), stores its hash on the
+ * account, and sends it via Resend. The owner completes signup at
+ * /activar (password + T&C).
  */
 export async function POST(
   request: Request,
@@ -49,15 +39,32 @@ export async function POST(
       return NextResponse.json({ error: "Account not found" }, { status: 404 });
     }
 
-    const siteUrl =
+    const db = supabaseAdmin();
+
+    // Fresh code invalidates any prior one and resets the used flag.
+    const code = generateActivationCode();
+    const { error: updateErr } = await db
+      .from("accounts")
+      .update({
+        activation_code_hash: hashActivationCode(code),
+        activation_code_expires_at: activationCodeExpiryFromNow(),
+        activation_code_used_at: null,
+      })
+      .eq("id", owner.accountId);
+
+    if (updateErr) {
+      return NextResponse.json({ error: updateErr.message }, { status: 400 });
+    }
+
+    const baseUrl =
       process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/+$/, "") || "https://medcrm.zuhma.online";
 
-    const { error: resetErr } = await supabaseAdmin().auth.resetPasswordForEmail(owner.ownerEmail, {
-      redirectTo: `${siteUrl}/auth/callback?next=${encodeURIComponent("/reset-password")}`,
-    });
-
-    if (resetErr) {
-      return NextResponse.json({ error: resetErr.message }, { status: 400 });
+    try {
+      await sendActivationCodeEmail({ to: owner.ownerEmail, code, baseUrl });
+    } catch (sendErr) {
+      const message = sendErr instanceof Error ? sendErr.message : "Error enviando el correo";
+      console.error("[resend-activation] send failed:", message);
+      return NextResponse.json({ error: `No se pudo enviar el correo: ${message}` }, { status: 502 });
     }
 
     await logPlatformAdminAction({
