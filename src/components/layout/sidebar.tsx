@@ -11,6 +11,7 @@ import { usePlatformAdmin } from "@/hooks/use-platform-admin";
 import {
   CalendarClock,
   Crown,
+  LifeBuoy,
   LogOut,
   Settings,
   Shield,
@@ -74,6 +75,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 const bottomNavItems = [
+  { href: "/soporte", labelKey: "help", icon: LifeBuoy },
   { href: "/settings", labelKey: "settings", icon: Settings },
 ];
 
