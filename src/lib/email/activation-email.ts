@@ -13,8 +13,21 @@ export interface SendActivationCodeEmailArgs {
   baseUrl: string;
 }
 
+/**
+ * Normaliza la URL base para que el enlace nunca salga malformado aunque
+ * la env venga con un typo: corrige el error común de una sola diagonal
+ * tras el esquema (`https:/host` → `https://host`) y agrega `https://`
+ * si falta el protocolo. Gmail marca "url no válida" ante un `https:/`.
+ */
+function normalizeBaseUrl(raw: string): string {
+  let base = raw.trim().replace(/\/+$/, "");
+  base = base.replace(/^(https?:)\/(?!\/)/i, "$1//");
+  if (!/^https?:\/\//i.test(base)) base = `https://${base}`;
+  return base;
+}
+
 export async function sendActivationCodeEmail(args: SendActivationCodeEmailArgs): Promise<void> {
-  const activateUrl = `${args.baseUrl.replace(/\/+$/, "")}/activar`;
+  const activateUrl = `${normalizeBaseUrl(args.baseUrl)}/activar`;
 
   const codeBlock =
     `<div style="margin:16px 0; padding:16px; text-align:center; background-color:#f4f4f5; ` +
