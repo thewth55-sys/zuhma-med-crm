@@ -14,6 +14,14 @@
  * (that step runs server-side, with no browser to fire gtag from).
  */
 
-export const CONVERSION_EVENTS = ["lead_created", "deal_won", "first_reply"] as const;
+export const CONVERSION_EVENTS = [
+  "lead_created",
+  "deal_won",
+  "first_reply",
+  // Pipeline server-side (Google Ads ECL). No tienen columna meta_track_*
+  // ni label gtag: sólo alimentan la subida ECL en dispatch.ts.
+  "lead_qualified",
+  "lead_disqualified",
+] as const;
 
 export type ConversionEvent = (typeof CONVERSION_EVENTS)[number];

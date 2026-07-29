@@ -130,6 +130,14 @@ export async function POST(request: Request) {
         phone,
         email: typeof body.email === 'string' ? body.email : undefined,
       });
+      // Guarda el event_id del navegador como orderId: es lo que permite
+      // retractar la conversión Lead en Google Ads si el lead se descalifica.
+      if (typeof body.event_id === 'string' && body.event_id.trim()) {
+        await ctx.supabase
+          .from('contacts')
+          .update({ google_order_id: body.event_id.trim() })
+          .eq('id', id);
+      }
     }
 
     if (Array.isArray(body.tags)) {

@@ -29,7 +29,17 @@ interface ConversionConfig {
   google_ads_lead_created_label: string | null;
   google_ads_deal_won_label: string | null;
   google_ads_first_reply_label: string | null;
+  google_ads_track_pipeline: boolean;
+  google_ads_client_id: string | null;
+  google_ads_customer_id: string | null;
+  google_ads_login_customer_id: string | null;
+  google_ads_qualified_action_id: string | null;
+  google_ads_won_action_id: string | null;
+  google_ads_lead_action_id: string | null;
   has_token: boolean;
+  has_google_developer_token: boolean;
+  has_google_client_secret: boolean;
+  has_google_refresh_token: boolean;
 }
 
 export function ConversionTrackingConfig() {
@@ -56,6 +66,18 @@ export function ConversionTrackingConfig() {
   const [googleLeadLabel, setGoogleLeadLabel] = useState('');
   const [googleDealWonLabel, setGoogleDealWonLabel] = useState('');
   const [googleFirstReplyLabel, setGoogleFirstReplyLabel] = useState('');
+  // Google Ads API (server-side ECL / pipeline)
+  const [googleTrackPipeline, setGoogleTrackPipeline] = useState(false);
+  const [googleDevToken, setGoogleDevToken] = useState('');
+  const [googleClientId, setGoogleClientId] = useState('');
+  const [googleClientSecret, setGoogleClientSecret] = useState('');
+  const [googleRefreshToken, setGoogleRefreshToken] = useState('');
+  const [googleCustomerId, setGoogleCustomerId] = useState('');
+  const [googleLoginCustomerId, setGoogleLoginCustomerId] = useState('');
+  const [googleQualifiedActionId, setGoogleQualifiedActionId] = useState('');
+  const [googleWonActionId, setGoogleWonActionId] = useState('');
+  const [googleLeadActionId, setGoogleLeadActionId] = useState('');
+  const [hasGoogleSecrets, setHasGoogleSecrets] = useState(false);
 
   const fetchConfig = useCallback(async () => {
     setLoading(true);
@@ -75,6 +97,20 @@ export function ConversionTrackingConfig() {
         setGoogleLeadLabel(config.google_ads_lead_created_label ?? '');
         setGoogleDealWonLabel(config.google_ads_deal_won_label ?? '');
         setGoogleFirstReplyLabel(config.google_ads_first_reply_label ?? '');
+        setGoogleTrackPipeline(config.google_ads_track_pipeline ?? false);
+        setGoogleClientId(config.google_ads_client_id ?? '');
+        setGoogleCustomerId(config.google_ads_customer_id ?? '');
+        setGoogleLoginCustomerId(config.google_ads_login_customer_id ?? '');
+        setGoogleQualifiedActionId(config.google_ads_qualified_action_id ?? '');
+        setGoogleWonActionId(config.google_ads_won_action_id ?? '');
+        setGoogleLeadActionId(config.google_ads_lead_action_id ?? '');
+        setHasGoogleSecrets(
+          Boolean(
+            config.has_google_developer_token ||
+              config.has_google_client_secret ||
+              config.has_google_refresh_token,
+          ),
+        );
         setHasStoredToken(config.has_token);
         setMetaAccessToken(config.has_token ? MASKED_TOKEN : '');
       }
@@ -112,10 +148,21 @@ export function ConversionTrackingConfig() {
         google_ads_lead_created_label: googleLeadLabel,
         google_ads_deal_won_label: googleDealWonLabel,
         google_ads_first_reply_label: googleFirstReplyLabel,
+        google_ads_track_pipeline: googleTrackPipeline,
+        google_ads_client_id: googleClientId,
+        google_ads_customer_id: googleCustomerId,
+        google_ads_login_customer_id: googleLoginCustomerId,
+        google_ads_qualified_action_id: googleQualifiedActionId,
+        google_ads_won_action_id: googleWonActionId,
+        google_ads_lead_action_id: googleLeadActionId,
       };
       if (tokenEdited && metaAccessToken !== MASKED_TOKEN) {
         payload.meta_access_token = metaAccessToken;
       }
+      // Secretos de Google Ads: sólo se envían si el admin los reescribe.
+      if (googleDevToken.trim()) payload.google_ads_developer_token = googleDevToken.trim();
+      if (googleClientSecret.trim()) payload.google_ads_client_secret = googleClientSecret.trim();
+      if (googleRefreshToken.trim()) payload.google_ads_refresh_token = googleRefreshToken.trim();
 
       const res = await fetch('/api/conversions/config', {
         method: 'POST',
@@ -336,6 +383,129 @@ export function ConversionTrackingConfig() {
                 placeholder={t('googleLabelPlaceholder')}
                 value={googleFirstReplyLabel}
                 onChange={(e) => setGoogleFirstReplyLabel(e.target.value)}
+                disabled={disabled}
+                className="bg-muted border-border text-foreground placeholder:text-muted-foreground"
+              />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-foreground">Google Ads — Pipeline (ECL server-side)</CardTitle>
+          <CardDescription className="text-muted-foreground">
+            Sube el resultado del pipeline (lead calificado / paciente) y retracta los leads no
+            calificados vía la API de Google Ads, con el correo/teléfono hasheado. Requiere
+            developer token, credenciales OAuth y las acciones de conversión creadas en Google Ads.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <label className="flex items-center gap-2 text-sm text-foreground">
+            <input
+              type="checkbox"
+              checked={googleTrackPipeline}
+              onChange={(e) => setGoogleTrackPipeline(e.target.checked)}
+              disabled={disabled}
+            />
+            Activar la subida server-side (ECL) del pipeline
+          </label>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label className="text-muted-foreground">Customer ID (solo dígitos)</Label>
+              <Input
+                placeholder="1234567890"
+                value={googleCustomerId}
+                onChange={(e) => setGoogleCustomerId(e.target.value)}
+                disabled={disabled}
+                className="bg-muted border-border text-foreground placeholder:text-muted-foreground"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-muted-foreground">Login Customer ID (MCC, opcional)</Label>
+              <Input
+                placeholder="opcional"
+                value={googleLoginCustomerId}
+                onChange={(e) => setGoogleLoginCustomerId(e.target.value)}
+                disabled={disabled}
+                className="bg-muted border-border text-foreground placeholder:text-muted-foreground"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label className="text-muted-foreground">Developer token</Label>
+            <Input
+              type="password"
+              placeholder={hasGoogleSecrets ? 'Guardado — deja en blanco para conservar' : ''}
+              value={googleDevToken}
+              onChange={(e) => setGoogleDevToken(e.target.value)}
+              disabled={disabled}
+              className="bg-muted border-border text-foreground placeholder:text-muted-foreground"
+            />
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label className="text-muted-foreground">OAuth Client ID</Label>
+              <Input
+                value={googleClientId}
+                onChange={(e) => setGoogleClientId(e.target.value)}
+                disabled={disabled}
+                className="bg-muted border-border text-foreground placeholder:text-muted-foreground"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-muted-foreground">OAuth Client Secret</Label>
+              <Input
+                type="password"
+                placeholder={hasGoogleSecrets ? 'Guardado — deja en blanco para conservar' : ''}
+                value={googleClientSecret}
+                onChange={(e) => setGoogleClientSecret(e.target.value)}
+                disabled={disabled}
+                className="bg-muted border-border text-foreground placeholder:text-muted-foreground"
+              />
+            </div>
+          </div>
+          <div className="space-y-2">
+            <Label className="text-muted-foreground">Refresh token</Label>
+            <Input
+              type="password"
+              placeholder={hasGoogleSecrets ? 'Guardado — deja en blanco para conservar' : ''}
+              value={googleRefreshToken}
+              onChange={(e) => setGoogleRefreshToken(e.target.value)}
+              disabled={disabled}
+              className="bg-muted border-border text-foreground placeholder:text-muted-foreground"
+            />
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-3">
+            <div className="space-y-2">
+              <Label className="text-muted-foreground">Action ID — Lead calificado</Label>
+              <Input
+                placeholder="ID numérico"
+                value={googleQualifiedActionId}
+                onChange={(e) => setGoogleQualifiedActionId(e.target.value)}
+                disabled={disabled}
+                className="bg-muted border-border text-foreground placeholder:text-muted-foreground"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-muted-foreground">Action ID — Paciente (ganado)</Label>
+              <Input
+                placeholder="ID numérico"
+                value={googleWonActionId}
+                onChange={(e) => setGoogleWonActionId(e.target.value)}
+                disabled={disabled}
+                className="bg-muted border-border text-foreground placeholder:text-muted-foreground"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-muted-foreground">Action ID — Lead (para retract)</Label>
+              <Input
+                placeholder="ID numérico"
+                value={googleLeadActionId}
+                onChange={(e) => setGoogleLeadActionId(e.target.value)}
                 disabled={disabled}
                 className="bg-muted border-border text-foreground placeholder:text-muted-foreground"
               />

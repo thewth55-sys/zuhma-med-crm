@@ -221,6 +221,21 @@ export function DealForm({
     onSaved();
   }
 
+  // Dispara un evento de pipeline server-side (Google Ads ECL / retract)
+  // por dealId; el correo/teléfono/orderId se resuelven en el servidor.
+  async function firePipelineEvent(event: "lead_qualified" | "lead_disqualified") {
+    if (!deal) return;
+    try {
+      await fetch("/api/conversions/pipeline-event", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ dealId: deal.id, event }),
+      });
+    } catch {
+      // best-effort — no bloquea la UI
+    }
+  }
+
   async function handleStatusChange(status: DealStatus) {
     if (!deal) return;
     setStatusAction(status);
@@ -244,6 +259,9 @@ export function DealForm({
         dealValue: deal.value,
         dealCurrency: deal.currency,
       });
+    } else if (status === "lost") {
+      // Retracta la conversión Lead en Google Ads (server-side, por orderId).
+      void firePipelineEvent("lead_disqualified");
     }
     onOpenChange(false);
     onSaved();
@@ -448,6 +466,18 @@ export function DealForm({
                     )}
                   </Button>
                 </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={async () => {
+                    await firePipelineEvent("lead_qualified");
+                    toast.success("Marcado como calificado para Google Ads");
+                  }}
+                  disabled={!!statusAction}
+                  className="w-full"
+                >
+                  Marcar como calificado
+                </Button>
                 {deal.status && deal.status !== "open" && (
                   <Button
                     type="button"
