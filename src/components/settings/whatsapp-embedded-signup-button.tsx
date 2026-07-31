@@ -51,7 +51,7 @@ export function WhatsAppEmbeddedSignupButton() {
   // env-only restart, which keeps the previously-baked value) is
   // required whenever these change in the deploy environment. Rebuild
   // marker: bump this comment to force a fresh `next build` when the
-  // Meta app id / config id env vars change. (rev 2)
+  // Meta app id / config id env vars change. (rev 3)
   const appId = process.env.NEXT_PUBLIC_META_APP_ID;
   const configId = process.env.NEXT_PUBLIC_META_WA_SIGNUP_CONFIG_ID;
 
