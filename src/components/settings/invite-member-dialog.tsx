@@ -80,6 +80,7 @@ export function InviteMemberDialog({
   const [role, setRole] = useState<InviteRole>('agent');
   const [expiry, setExpiry] = useState<string>('7');
   const [label, setLabel] = useState('');
+  const [email, setEmail] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState<CreatedInvite | null>(null);
 
@@ -112,6 +113,7 @@ export function InviteMemberDialog({
           role,
           expiresInDays: Number(expiry),
           label: trimmedLabel || undefined,
+          email: email.trim() || undefined,
         }),
       });
 
@@ -124,7 +126,14 @@ export function InviteMemberDialog({
       const data = (await res.json()) as {
         url: string;
         expiresInDays: number;
+        emailed?: boolean;
       };
+
+      if (data.emailed) {
+        toast.success(`Invitación enviada a ${email.trim()}`);
+      } else if (email.trim()) {
+        toast.error('No se pudo enviar el correo; comparte el enlace manualmente.');
+      }
 
       setResult({
         url: data.url,
@@ -320,6 +329,24 @@ export function InviteMemberDialog({
                 />
                 <p className="text-xs text-muted-foreground">
                   {t('labelHint')}
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-muted-foreground">
+                  Correo del compañero{' '}
+                  <span className="text-xs text-muted-foreground">(opcional)</span>
+                </Label>
+                <Input
+                  type="email"
+                  placeholder="nombre@correo.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="bg-muted border-border text-foreground placeholder:text-muted-foreground"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Si lo llenas, le enviamos la invitación por correo. Si lo dejas vacío, solo se
+                  genera el enlace para compartir a mano.
                 </p>
               </div>
             </div>

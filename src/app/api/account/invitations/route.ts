@@ -32,6 +32,8 @@ import {
   rateLimitResponse,
   RATE_LIMITS,
 } from "@/lib/rate-limit";
+import { renderBrandedEmail, emailButton, escapeHtml } from "@/lib/email/branded-template";
+import { sendEmail } from "@/lib/email/resend-client";
 
 // Resolve the base URL we publish invite links under.
 //
@@ -179,7 +181,7 @@ export async function POST(request: Request) {
     if (!limit.success) return rateLimitResponse(limit);
 
     const body = (await request.json().catch(() => null)) as
-      | { role?: unknown; expiresInDays?: unknown; label?: unknown }
+      | { role?: unknown; expiresInDays?: unknown; label?: unknown; email?: unknown }
       | null;
 
     const role = body?.role;
@@ -237,13 +239,52 @@ export async function POST(request: Request) {
       );
     }
 
+    const url = inviteUrl(token, getBaseUrl(request));
+
+    // Optional: email the invite link to the teammate. Best-effort —
+    // if the send fails the invite still exists and the admin can
+    // share the link manually, so we never fail the request on it.
+    let emailed = false;
+    const inviteEmail =
+      typeof body?.email === "string" ? body.email.trim().toLowerCase() : "";
+    if (inviteEmail && inviteEmail.includes("@")) {
+      try {
+        const { data: acct } = await ctx.supabase
+          .from("accounts")
+          .select("name")
+          .eq("id", ctx.accountId)
+          .maybeSingle<{ name: string | null }>();
+        const accountName = acct?.name ?? "Zuhma";
+        const html = renderBrandedEmail({
+          heading: "Te invitaron a un equipo",
+          bodyHtml:
+            `<p>Te invitaron a unirte a <strong>${escapeHtml(accountName)}</strong> en Zuhma como ` +
+            `<strong>${escapeHtml(role)}</strong>. Acepta la invitación para crear tu acceso:</p>` +
+            emailButton("Aceptar invitación", url) +
+            `<p style="margin-top:20px; font-size:12px; color:#999;">Si el botón no funciona, copia y ` +
+            `pega este enlace en tu navegador:<br><a href="${url}" style="word-break:break-all;">${url}</a></p>` +
+            `<p style="margin-top:12px; font-size:12px; color:#999;">La invitación vence en ${expiryDays} días.</p>`,
+          brandName: "Zuhma",
+        });
+        await sendEmail({
+          to: inviteEmail,
+          subject: `Te invitaron a unirte a ${accountName} en Zuhma`,
+          html,
+        });
+        emailed = true;
+      } catch (err) {
+        console.error("[POST /api/account/invitations] invite email failed:", err);
+      }
+    }
+
     return NextResponse.json(
       {
         invitation: data,
         // Plaintext payload — visible to the admin exactly once.
         token,
-        url: inviteUrl(token, getBaseUrl(request)),
+        url,
         expiresInDays: expiryDays,
+        emailed,
       },
       { status: 201 },
     );
