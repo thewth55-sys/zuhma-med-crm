@@ -1,8 +1,13 @@
 "use client";
 
-import { Suspense, useCallback, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { Capacitor } from "@capacitor/core";
+import { createClient } from "@/lib/supabase/client";
+import { loadNativeSession, clearNativeSession } from "@/lib/native-session";
+import { AndroidAppBanner } from "@/components/android-app-banner";
+import { Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { TurnstileWidget } from "@/components/auth/turnstile-widget";
 import { Button } from "@/components/ui/button";
@@ -47,6 +52,40 @@ function LoginPageInner() {
 
   const handleTurnstileExpire = useCallback(() => setTurnstileToken(null), []);
 
+  // Native-only session restore. On the Android app the WebView's own
+  // cookie jar isn't reliably persisted across a full app close on
+  // every OEM (see native-session.ts), so if we backed up a session to
+  // native storage before, restore it here before showing the form.
+  // No-op on web — `restoring` stays false and the form renders.
+  const [restoring, setRestoring] = useState(false);
+
+  useEffect(() => {
+    if (!Capacitor.isNativePlatform()) return;
+    queueMicrotask(() => setRestoring(true));
+    (async () => {
+      const stored = await loadNativeSession();
+      if (!stored) {
+        setRestoring(false);
+        return;
+      }
+      const supabase = createClient();
+      const { error } = await supabase.auth.setSession({
+        access_token: stored.access_token,
+        refresh_token: stored.refresh_token,
+      });
+      if (error) {
+        console.error("Native session restore failed:", error);
+        await clearNativeSession();
+        setRestoring(false);
+        return;
+      }
+      // Hard navigation so the server (middleware) sees the fresh cookies.
+      window.location.href = inviteToken
+        ? `/join/${encodeURIComponent(inviteToken)}`
+        : "/dashboard";
+    })();
+  }, [inviteToken]);
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -77,8 +116,17 @@ function LoginPageInner() {
       : "/dashboard";
   };
 
+  if (restoring) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <Loader2 className="size-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
+      <AndroidAppBanner />
       <Card className="w-full max-w-md border-border bg-card">
         <CardHeader className="items-center text-center">
           <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">

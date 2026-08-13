@@ -2273,5 +2273,18 @@
         "makeDefault": "Make default"
       }
     }
+  },
+  "BiometricLock": {
+    "reason": "Verify your identity to continue",
+    "cancel": "Cancel",
+    "androidTitle": "Zuhma Med",
+    "lockedMessage": "The app is locked. Verify your identity to continue.",
+    "unlockButton": "Unlock"
+  },
+  "AndroidAppBanner": {
+    "title": "Zuhma Med",
+    "subtitle": "Download the app for a better experience",
+    "download": "Download",
+    "dismiss": "Close"
   }
 }

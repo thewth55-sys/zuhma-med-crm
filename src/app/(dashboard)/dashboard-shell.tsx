@@ -7,6 +7,9 @@ import { Sidebar } from "@/components/layout/sidebar";
 import { Header } from "@/components/layout/header";
 import { PresenceHeartbeat } from "@/components/presence/presence-heartbeat";
 import { NotificationAlerts } from "@/components/notifications/notification-alerts";
+import { PushRegistration } from "@/components/notifications/push-registration";
+import { NativeSessionSync } from "@/components/notifications/native-session-sync";
+import { BiometricLock } from "@/components/notifications/biometric-lock";
 
 // Auth-gated dashboard shell. Extracted from the layout so the layout
 // itself can stay a server component and export metadata (noindex) —
@@ -41,6 +44,7 @@ function DashboardShellInner({ children }: { children: React.ReactNode }) {
   if (!user) return null;
 
   return (
+    <BiometricLock>
     <div className="flex h-screen overflow-hidden bg-background">
       {/* Reports this tab's online/away presence once we know a user is
           signed in. Headless — renders nothing. */}
@@ -48,6 +52,10 @@ function DashboardShellInner({ children }: { children: React.ReactNode }) {
       {/* Plays a chime / fires a native popup on new messages or
           assignments while this tab is open. Headless — renders nothing. */}
       <NotificationAlerts />
+      {/* Native-only (no-op on web): registers the device for FCM push
+          and backs up the session to native storage. */}
+      <PushRegistration />
+      <NativeSessionSync />
       <Sidebar open={sidebarOpen} onClose={closeSidebar} />
       <div className="flex flex-1 flex-col overflow-hidden">
         <Header onOpenSidebar={() => setSidebarOpen(true)} />
@@ -55,6 +63,7 @@ function DashboardShellInner({ children }: { children: React.ReactNode }) {
         <main className="flex-1 overflow-y-auto p-4 sm:p-6">{children}</main>
       </div>
     </div>
+    </BiometricLock>
   );
 }
 
