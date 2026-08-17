@@ -11,6 +11,7 @@ import { dispatchInboundToFlows } from '@/lib/flows/engine'
 import { dispatchInboundToAiReply } from '@/lib/ai/auto-reply'
 import { dispatchWebhookEvent } from '@/lib/webhooks/deliver'
 import { dispatchConversionEvent } from '@/lib/conversions/dispatch'
+import { createLeadDeal } from '@/lib/pipelines/auto-lead-deal'
 import {
   handleTemplateWebhookChange,
   isTemplateWebhookField,
@@ -617,6 +618,19 @@ async function processMessage(
   )
   if (!convResult) return
   const conversation = convResult.conversation
+
+  // Lead nuevo → crea automáticamente un negocio en la primera etapa del
+  // pipeline principal, ligado a esta conversación. Best-effort: no bloquea
+  // la recepción del mensaje y no hace nada si no hay pipeline configurado.
+  if (contactOutcome.wasCreated) {
+    await createLeadDeal(supabaseAdmin(), {
+      accountId,
+      userId: configOwnerUserId,
+      contactId: contactRecord.id,
+      conversationId: conversation.id,
+      title: contactName || senderPhone,
+    })
+  }
 
   // Emit conversation.created as soon as the thread is opened — BEFORE
   // the reaction short-circuit below — so a conversation first opened by
