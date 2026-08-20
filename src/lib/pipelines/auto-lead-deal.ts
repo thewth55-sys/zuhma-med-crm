@@ -10,9 +10,10 @@ import type { SupabaseClient } from "@supabase/supabase-js";
  * nada; cualquier error se registra y se traga (nunca debe romper la
  * recepción del mensaje que lo disparó).
  *
- * El pipeline "principal" es el de menor `position` (y a igualdad, el más
- * antiguo) — el mismo que la UI muestra por defecto. La etapa destino es la
- * de menor `position` de ese pipeline (la columna "New Lead").
+ * El pipeline "principal" es el más antiguo de la cuenta (la tabla
+ * `pipelines` no tiene columna de orden) — normalmente el "Sales Pipeline"
+ * por defecto. La etapa destino es la de menor `position` de ese pipeline
+ * (la columna "New Lead").
  */
 export async function createLeadDeal(
   db: SupabaseClient,
@@ -29,7 +30,6 @@ export async function createLeadDeal(
       .from("pipelines")
       .select("id")
       .eq("account_id", args.accountId)
-      .order("position", { ascending: true })
       .order("created_at", { ascending: true })
       .limit(1)
       .maybeSingle<{ id: string }>();
