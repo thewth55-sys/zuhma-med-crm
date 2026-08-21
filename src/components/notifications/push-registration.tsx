@@ -68,6 +68,22 @@ export function PushRegistration() {
         }),
       );
 
+      // Android O+ exige que el canal exista antes de postear en él. Su id
+      // debe coincidir con default_notification_channel_id del manifest.
+      try {
+        await PushNotifications.createChannel({
+          id: "zuhma_default",
+          name: "Notificaciones",
+          description: "Recordatorios de citas, mensajes y avisos de Zuhma Med.",
+          importance: 5,
+          visibility: 1,
+          lights: true,
+          vibration: true,
+        });
+      } catch {
+        // no-op: en algunas variantes de Android createChannel no aplica.
+      }
+
       const permission = await PushNotifications.requestPermissions();
       if (!cancelled && permission.receive === "granted") {
         await PushNotifications.register();

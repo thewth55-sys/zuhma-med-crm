@@ -4,4 +4,5 @@
     <string name="title_activity_main">Zuhma Med</string>
     <string name="package_name">com.zuhma.med</string>
     <string name="custom_url_scheme">com.zuhma.med</string>
+    <string name="default_notification_channel_id">zuhma_default</string>
 </resources>
