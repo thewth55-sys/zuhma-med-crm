@@ -123,7 +123,13 @@ export function BookingWidget({
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <Label>Servicio</Label>
-              <Select value={serviceTypeId} onValueChange={(v) => setServiceTypeId(v ?? "")}>
+              <Select
+                value={serviceTypeId}
+                onValueChange={(v) => setServiceTypeId(v ?? "")}
+                items={Object.fromEntries(
+                  config.serviceTypes.map((s) => [s.id, `${s.name} (${s.duration_minutes} min)`]),
+                )}
+              >
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Elige un servicio" />
                 </SelectTrigger>
@@ -138,7 +144,13 @@ export function BookingWidget({
             </div>
             <div className="space-y-2">
               <Label>Doctor</Label>
-              <Select value={doctorId} onValueChange={(v) => setDoctorId(v ?? "")}>
+              <Select
+                value={doctorId}
+                onValueChange={(v) => setDoctorId(v ?? "")}
+                items={Object.fromEntries(
+                  config.doctors.map((d) => [d.id, d.specialty ? `${d.name} — ${d.specialty}` : d.name]),
+                )}
+              >
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Elige un doctor" />
                 </SelectTrigger>
