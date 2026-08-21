@@ -12,11 +12,13 @@ import { useAuth } from "@/hooks/use-auth";
  * tokens FCM son lo que permite al SERVIDOR mandar un push aunque la app
  * esté cerrada o el teléfono bloqueado.
  *
- * Gated tras NEXT_PUBLIC_FIREBASE_PUSH_ENABLED: el plugin nativo
- * @capacitor/push-notifications lanza un FATAL (no atrapable desde JS)
- * si el build Android no tiene google-services.json. Activa este flag
- * solo cuando google-services.json esté en el build nativo Y
- * FIREBASE_SERVICE_ACCOUNT_JSON esté configurado en el servidor.
+ * Habilitación: se consulta a `/api/push/config` EN RUNTIME en vez de
+ * leer NEXT_PUBLIC_FIREBASE_PUSH_ENABLED en el cliente — el pipeline de
+ * build de Easypanel no incrusta ese NEXT_PUBLIC_* de forma fiable, así
+ * que la app quedaba siempre "deshabilitada". El gate sigue existiendo
+ * porque el plugin nativo @capacitor/push-notifications lanza un FATAL
+ * si el build Android no trae google-services.json; solo se habilita
+ * cuando eso está listo Y FIREBASE_SERVICE_ACCOUNT_JSON en el servidor.
  *
  * Se monta una vez por sesión (dashboard-shell.tsx).
  */
@@ -25,51 +27,56 @@ export function PushRegistration() {
   const router = useRouter();
 
   useEffect(() => {
-    const pushEnabled = process.env.NEXT_PUBLIC_FIREBASE_PUSH_ENABLED === "true";
-    const native = Capacitor.isNativePlatform();
+    if (!user || !Capacitor.isNativePlatform()) return;
 
-    // TEMP DIAG — reporta al log del servidor qué gate corta el registro.
-    // Quitar una vez confirmado el push (buscar "push/diag" en los logs).
-    void fetch(
-      `/api/push/register?diag=1&native=${native}&enabled=${pushEnabled}&user=${!!user}`,
-    ).catch(() => {});
-
-    if (!user || !pushEnabled || !native) return;
-
-    let registrationHandle: { remove: () => void } | undefined;
-    let errorHandle: { remove: () => void } | undefined;
-    let tapHandle: { remove: () => void } | undefined;
+    let cancelled = false;
+    const handles: Array<{ remove: () => void }> = [];
 
     (async () => {
-      registrationHandle = await PushNotifications.addListener("registration", (token) => {
-        void fetch("/api/push/register", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ token: token.value, platform: "android" }),
-        }).catch((err) => console.error("Push token registration failed:", err));
-      });
+      // Fuente de verdad en runtime (ver /api/push/config).
+      let enabled = false;
+      try {
+        const res = await fetch("/api/push/config");
+        enabled = (await res.json())?.enabled === true;
+      } catch {
+        enabled = false;
+      }
+      if (cancelled || !enabled) return;
 
-      errorHandle = await PushNotifications.addListener("registrationError", (err) => {
-        console.error("Push registration error:", err);
-      });
+      handles.push(
+        await PushNotifications.addListener("registration", (token) => {
+          void fetch("/api/push/register", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ token: token.value, platform: "android" }),
+          }).catch((err) => console.error("Push token registration failed:", err));
+        }),
+      );
 
-      tapHandle = await PushNotifications.addListener("pushNotificationActionPerformed", (action) => {
-        const url = action.notification.data?.url;
-        if (typeof url === "string" && url.startsWith("/")) {
-          router.push(url);
-        }
-      });
+      handles.push(
+        await PushNotifications.addListener("registrationError", (err) => {
+          console.error("Push registration error:", err);
+        }),
+      );
+
+      handles.push(
+        await PushNotifications.addListener("pushNotificationActionPerformed", (action) => {
+          const url = action.notification.data?.url;
+          if (typeof url === "string" && url.startsWith("/")) {
+            router.push(url);
+          }
+        }),
+      );
 
       const permission = await PushNotifications.requestPermissions();
-      if (permission.receive === "granted") {
+      if (!cancelled && permission.receive === "granted") {
         await PushNotifications.register();
       }
     })();
 
     return () => {
-      registrationHandle?.remove();
-      errorHandle?.remove();
-      tapHandle?.remove();
+      cancelled = true;
+      handles.forEach((h) => h.remove());
     };
   }, [user, router]);
 

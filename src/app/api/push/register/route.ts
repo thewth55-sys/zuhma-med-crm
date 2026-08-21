@@ -14,23 +14,6 @@ const PLATFORMS = ["android", "ios", "web"] as const;
  * sesión), para que un dispositivo viejo deje de recibir pushes de una
  * cuenta a la que ya no pertenece.
  */
-/**
- * GET ?diag=1 — beacon de diagnóstico TEMPORAL desde push-registration.tsx.
- * Registra en el log del servidor qué condición (native/enabled/user) corta
- * el registro del token en el dispositivo. Sin secretos ni auth; quitar una
- * vez confirmado el push (buscar "[push/diag]").
- */
-export function GET(request: Request) {
-  const u = new URL(request.url);
-  if (u.searchParams.get("diag") === "1") {
-    const native = u.searchParams.get("native") === "true";
-    const enabled = u.searchParams.get("enabled") === "true";
-    const user = u.searchParams.get("user") === "true";
-    console.log(`[push/diag] native=${native} enabled=${enabled} user=${user}`);
-  }
-  return NextResponse.json({ ok: true });
-}
-
 export async function POST(request: Request) {
   try {
     const { supabase, accountId, userId } = await requireRole("viewer");
