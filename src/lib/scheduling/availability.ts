@@ -83,6 +83,33 @@ export function subtractRanges(base: TimeRange[], busy: TimeRange[]): TimeRange[
 }
 
 /**
+ * Intersects two sets of ranges, returning only the sub-ranges covered
+ * by BOTH. Used to constrain a doctor's declared availability blocks to
+ * the clinic's general business hours (feature C): a doctor is bookable
+ * only where their block AND the clinic's open window overlap. Both
+ * inputs are unioned first so internal overlaps don't duplicate output.
+ */
+export function intersectRanges(a: TimeRange[], b: TimeRange[]): TimeRange[] {
+  const ra = unionRanges(a);
+  const rb = unionRanges(b);
+  const result: TimeRange[] = [];
+  for (const x of ra) {
+    const xs = new Date(x.start_at).getTime();
+    const xe = new Date(x.end_at).getTime();
+    for (const y of rb) {
+      const ys = new Date(y.start_at).getTime();
+      const ye = new Date(y.end_at).getTime();
+      const start = Math.max(xs, ys);
+      const end = Math.min(xe, ye);
+      if (start < end) {
+        result.push({ start_at: new Date(start).toISOString(), end_at: new Date(end).toISOString() });
+      }
+    }
+  }
+  return result;
+}
+
+/**
  * Chops free ranges into discrete `slotMinutes`-long bookable slots,
  * aligned to each range's own start (not wall-clock boundaries) —
  * simplest correct behavior given availability blocks are declared

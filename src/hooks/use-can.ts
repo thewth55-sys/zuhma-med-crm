@@ -5,6 +5,7 @@ import {
   canDeleteAccount,
   canEditSettings,
   canManageMembers,
+  canManageScheduling,
   canSendMessages,
   canTransferOwnership,
   canViewOnly,
@@ -19,6 +20,7 @@ import {
 export type CanAction =
   | "manage-members"
   | "edit-settings"
+  | "manage-scheduling"
   | "send-messages"
   | "view-only"
   | "delete-account"
@@ -46,6 +48,8 @@ export function useCan(action: CanAction): boolean {
       return canManageMembers(accountRole);
     case "edit-settings":
       return canEditSettings(accountRole);
+    case "manage-scheduling":
+      return canManageScheduling(accountRole);
     case "send-messages":
       return canSendMessages(accountRole);
     case "view-only":

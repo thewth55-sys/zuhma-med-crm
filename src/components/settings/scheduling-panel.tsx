@@ -2,6 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 
+import { BusinessHoursManager } from './business-hours-manager';
 import { DoctorManager } from './doctor-manager';
 import { RoomManager } from './room-manager';
 import { ServiceTypeManager } from './service-type-manager';
@@ -21,6 +22,7 @@ export function SchedulingPanel() {
   return (
     <section className="max-w-3xl animate-in fade-in-50 space-y-4 duration-200">
       <SettingsPanelHead title={t('title')} description={t('description')} />
+      <BusinessHoursManager />
       <DoctorManager />
       <RoomManager />
       <ServiceTypeManager />

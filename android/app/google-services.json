@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "358629332606",
+    "project_id": "zuhma-med",
+    "storage_bucket": "zuhma-med.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:358629332606:android:027e981601a2e1e723aa2f",
+        "android_client_info": {
+          "package_name": "com.zuhma.med"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDF4vAN_tmPWlT9Wz0kbrQOMyRjDTrSTa4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

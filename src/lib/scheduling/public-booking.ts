@@ -1,20 +1,29 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { decrypt } from "@/lib/whatsapp/encryption";
 import { refreshAccessToken, getFreeBusy } from "@/lib/google-calendar/client";
-import { chunkIntoSlots, subtractRanges, type TimeRange } from "./availability";
+import { chunkIntoSlots, intersectRanges, subtractRanges, type TimeRange } from "./availability";
+import { computeClinicRanges } from "./business-hours";
 
 /**
  * Server-only slot computation for the public booking widget
  * (/agendar/[slug]). Always called with the service-role client —
  * there's no end-user session for an anonymous visitor.
  *
- * Bookable time = the doctor's declared availability blocks, minus
- * existing appointments, minus Google Calendar busy time (if
- * connected) — the exact same sources the internal Agenda view
- * already treats as authoritative, just recombined for public
- * consumption. A doctor with no declared blocks simply has no public
- * slots; that's an existing, documented property of
- * `doctor_availability_blocks`, not a new gap introduced here.
+ * Bookable time is built from two layers:
+ *  - The clinic's general business hours (feature C), if the account
+ *    has any configured. These define the days/hours of service.
+ *  - The doctor's own declared availability blocks (feature A), if any.
+ *
+ * How they combine (then minus appointments + Google Calendar busy):
+ *  - Clinic hours configured + doctor has blocks that day → the
+ *    intersection (doctor is bookable only where both overlap).
+ *  - Clinic hours configured + doctor has NO blocks that day → the
+ *    clinic hours (doctor available whenever the clinic is open). This
+ *    is what lets a clinic go live just by setting general hours,
+ *    without declaring per-doctor blocks.
+ *  - No clinic hours configured → falls back to the original behavior:
+ *    doctor's declared blocks only (a doctor with no blocks has no
+ *    public slots).
  */
 export async function computeAvailableSlots(
   admin: SupabaseClient,
@@ -28,7 +37,7 @@ export async function computeAvailableSlots(
 ): Promise<TimeRange[]> {
   const { accountId, doctorId, slotMinutes, rangeStart, rangeEnd } = params;
 
-  const [blocksRes, apptsRes, doctorRes] = await Promise.all([
+  const [blocksRes, apptsRes, doctorRes, clinic] = await Promise.all([
     admin
       .from("doctor_availability_blocks")
       .select("start_at, end_at")
@@ -45,6 +54,7 @@ export async function computeAvailableSlots(
       .lt("start_at", rangeEnd)
       .gt("end_at", rangeStart),
     admin.from("doctors").select("user_id").eq("id", doctorId).maybeSingle(),
+    computeClinicRanges(admin, accountId, rangeStart, rangeEnd),
   ]);
 
   const declaredBlocks = (blocksRes.data ?? []) as TimeRange[];
@@ -77,7 +87,16 @@ export async function computeAvailableSlots(
     }
   }
 
-  const free = subtractRanges(declaredBlocks, busy);
+  // Combine clinic hours (feature C) with the doctor's own blocks
+  // (feature A). See the function doc for the three cases.
+  let base: TimeRange[];
+  if (clinic.configured) {
+    base = declaredBlocks.length > 0 ? intersectRanges(declaredBlocks, clinic.ranges) : clinic.ranges;
+  } else {
+    base = declaredBlocks;
+  }
+
+  const free = subtractRanges(base, busy);
   const slots = chunkIntoSlots(free, slotMinutes);
 
   // Drop anything that's already started — a visitor browsing "today"

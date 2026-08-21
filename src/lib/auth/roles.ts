@@ -90,6 +90,18 @@ export function canSendMessages(role: AccountRole): boolean {
 }
 
 /**
+ * Owner / admin / agent: manage clinic scheduling resources' day-to-day
+ * availability — specifically, declare/adjust any doctor's availability
+ * blocks (feature A). Broader than `canEditSettings` on purpose: front-
+ * desk agents schedule doctors without being account admins. The
+ * account-wide clinic hours (business_hours) remain admin-only via
+ * `canEditSettings`.
+ */
+export function canManageScheduling(role: AccountRole): boolean {
+  return hasMinRole(role, "agent");
+}
+
+/**
  * Viewer: read-only across everything. Provided as a positive
  * predicate so UI gates read naturally (`if (canViewOnly(role))`
  * shows the "Read-only" tooltip without inverting `canSendMessages`).

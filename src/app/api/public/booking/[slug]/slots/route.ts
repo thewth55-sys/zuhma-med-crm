@@ -1,17 +1,17 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase/admin-client";
 import { computeAvailableSlots } from "@/lib/scheduling/public-booking";
+import { localDateTimeToUtcISO } from "@/lib/scheduling/business-hours";
 import { checkRateLimit, getClientIp, rateLimitResponse, RATE_LIMITS } from "@/lib/rate-limit";
 
 /**
  * GET /api/public/booking/[slug]/slots?doctor_id=&service_type_id=&date=YYYY-MM-DD
  *
  * Returns bookable slot start/end times for one doctor on one day.
- * `date` is treated as a UTC calendar day (no per-account timezone
- * exists yet to do this precisely) — acceptable for the MVP since
- * doctors declare their own availability blocks in absolute
- * timestamps already; a future timezone field would only sharpen the
- * day-boundary math, not change the underlying free/busy logic.
+ * `date` is treated as the clinic's LOCAL calendar day, resolved
+ * through the account's `timezone` (migration 074), so the day
+ * boundary matches the local business hours and locally-declared
+ * availability blocks the free/busy logic uses.
  */
 export async function GET(
   request: Request,
@@ -38,7 +38,7 @@ export async function GET(
 
   const { data: account } = await admin
     .from("accounts")
-    .select("id, public_booking_enabled")
+    .select("id, public_booking_enabled, timezone")
     .eq("public_booking_slug", slug)
     .maybeSingle();
   if (!account || !account.public_booking_enabled) {
@@ -66,16 +66,23 @@ export async function GET(
     return NextResponse.json({ error: "Doctor or service type not found" }, { status: 404 });
   }
 
-  const rangeStart = new Date(`${date}T00:00:00.000Z`).toISOString();
-  const rangeEnd = new Date(`${date}T00:00:00.000Z`);
-  rangeEnd.setUTCDate(rangeEnd.getUTCDate() + 1);
+  // Treat `date` as the clinic's LOCAL calendar day (account timezone),
+  // so the day-boundary lines up with the local business hours and the
+  // doctor's locally-declared availability blocks. No DST in Mexico
+  // means local-midnight → next-local-midnight is a clean 24h.
+  const tz = (account.timezone as string) || "America/Mexico_City";
+  const nextDay = new Date(`${date}T00:00:00.000Z`);
+  nextDay.setUTCDate(nextDay.getUTCDate() + 1);
+  const nextDate = nextDay.toISOString().slice(0, 10);
+  const rangeStart = localDateTimeToUtcISO(date, "00:00", tz);
+  const rangeEnd = localDateTimeToUtcISO(nextDate, "00:00", tz);
 
   const slots = await computeAvailableSlots(admin, {
     accountId: account.id,
     doctorId,
     slotMinutes: serviceType.duration_minutes,
     rangeStart,
-    rangeEnd: rangeEnd.toISOString(),
+    rangeEnd,
   });
 
   return NextResponse.json({ slots });

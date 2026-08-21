@@ -2162,7 +2162,25 @@
         "deleteTitle": "Remove doctor",
         "deleteConfirm": "Remove \"{name}\"? Existing appointments keep their history; new ones can no longer be assigned to them.",
         "cancel": "Cancel",
-        "deleting": "Removing..."
+        "deleting": "Removing...",
+        "availability": {
+          "button": "Availability",
+          "title": "{name}’s availability",
+          "description": "Time blocks when this doctor is available for appointments. When clinic hours are set, the doctor is only offered where both this block and clinic hours overlap.",
+          "dateLabel": "Date",
+          "startLabel": "From",
+          "endLabel": "To",
+          "add": "Add block",
+          "empty": "No availability blocks. Clinic hours will be used if set.",
+          "loadFailed": "Failed to load availability",
+          "added": "Block added",
+          "addFailed": "Could not add block",
+          "removed": "Block removed",
+          "removeFailed": "Could not remove block",
+          "invalidRange": "End time must be after start time.",
+          "close": "Close",
+          "removeAria": "Remove block"
+        }
       },
       "rooms": {
         "title": "Exam rooms",
@@ -2226,6 +2244,29 @@
         "deleting": "Removing...",
         "linkedProduct": "Linked product",
         "noLinkedProduct": "No linked product"
+      },
+      "businessHours": {
+        "title": "Clinic hours",
+        "description": "Your brand’s service days and hours. Used as the base for the slots offered on your public booking page.",
+        "timezoneLabel": "Time zone",
+        "open": "Opens",
+        "close": "Closes",
+        "closed": "Closed",
+        "save": "Save hours",
+        "saving": "Saving...",
+        "saved": "Hours saved",
+        "saveFailed": "Could not save hours",
+        "loadFailed": "Failed to load hours",
+        "invalidRange": "Closing time must be after opening time.",
+        "days": {
+          "0": "Sunday",
+          "1": "Monday",
+          "2": "Tuesday",
+          "3": "Wednesday",
+          "4": "Thursday",
+          "5": "Friday",
+          "6": "Saturday"
+        }
       }
     },
     "billing": {

@@ -2162,7 +2162,25 @@
         "deleteTitle": "Eliminar doctor",
         "deleteConfirm": "¿Eliminar a \"{name}\"? Las citas existentes conservan su historial; las nuevas ya no podrán asignársele.",
         "cancel": "Cancelar",
-        "deleting": "Eliminando..."
+        "deleting": "Eliminando...",
+        "availability": {
+          "button": "Horarios",
+          "title": "Disponibilidad de {name}",
+          "description": "Bloques en los que este doctor está disponible para citas. Si defines horario de clínica, el doctor solo se ofrece dentro de esos bloques y del horario general.",
+          "dateLabel": "Fecha",
+          "startLabel": "Desde",
+          "endLabel": "Hasta",
+          "add": "Agregar bloque",
+          "empty": "Sin bloques de disponibilidad. Si hay horario de clínica, se usará ese.",
+          "loadFailed": "Error al cargar la disponibilidad",
+          "added": "Bloque agregado",
+          "addFailed": "No se pudo agregar el bloque",
+          "removed": "Bloque eliminado",
+          "removeFailed": "No se pudo eliminar el bloque",
+          "invalidRange": "La hora final debe ser posterior a la inicial.",
+          "close": "Cerrar",
+          "removeAria": "Eliminar bloque"
+        }
       },
       "rooms": {
         "title": "Consultorios",
@@ -2226,6 +2244,29 @@
         "deleting": "Eliminando...",
         "linkedProduct": "Producto vinculado",
         "noLinkedProduct": "Sin producto vinculado"
+      },
+      "businessHours": {
+        "title": "Horario de la clínica",
+        "description": "Días y horas de servicio de la marca. Se usan como base para los horarios que se ofrecen en la página de agendamiento en línea.",
+        "timezoneLabel": "Zona horaria",
+        "open": "Abre",
+        "close": "Cierra",
+        "closed": "Cerrado",
+        "save": "Guardar horario",
+        "saving": "Guardando...",
+        "saved": "Horario guardado",
+        "saveFailed": "No se pudo guardar el horario",
+        "loadFailed": "Error al cargar el horario",
+        "invalidRange": "La hora de cierre debe ser posterior a la de apertura.",
+        "days": {
+          "0": "Domingo",
+          "1": "Lunes",
+          "2": "Martes",
+          "3": "Miércoles",
+          "4": "Jueves",
+          "5": "Viernes",
+          "6": "Sábado"
+        }
       }
     },
     "billing": {

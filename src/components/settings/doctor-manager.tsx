@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import { Loader2, Plus, UserRound, X } from 'lucide-react';
+import { CalendarClock, Loader2, Plus, UserRound, X } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/hooks/use-auth';
 import { useCan } from '@/hooks/use-can';
@@ -28,6 +28,20 @@ import {
 import { useTranslations } from 'next-intl';
 import type { AccountMember, Doctor } from '@/types';
 
+interface AvailabilityBlock {
+  id: string;
+  start_at: string;
+  end_at: string;
+  notes: string | null;
+}
+
+const blockDateFmt = new Intl.DateTimeFormat('es-MX', {
+  weekday: 'short',
+  day: 'numeric',
+  month: 'short',
+});
+const blockTimeFmt = new Intl.DateTimeFormat('es-MX', { hour: '2-digit', minute: '2-digit' });
+
 /**
  * Doctors card. Same fetch/inline-create/confirm-delete shape as
  * RoomManager, plus a "linked account member" select — inviting a
@@ -42,6 +56,8 @@ export function DoctorManager() {
   const supabase = createClient();
   const { accountId, loading: authLoading } = useAuth();
   const canEdit = useCan('edit-settings');
+  const canManageAvailability = useCan('manage-scheduling');
+  const ta = useTranslations('Settings.scheduling.doctors.availability');
 
   const [loading, setLoading] = useState(true);
   const [doctors, setDoctors] = useState<Doctor[]>([]);
@@ -52,6 +68,15 @@ export function DoctorManager() {
   const [deleting, setDeleting] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [toDelete, setToDelete] = useState<Doctor | null>(null);
+
+  // Availability management (feature A).
+  const [availDoctor, setAvailDoctor] = useState<Doctor | null>(null);
+  const [blocks, setBlocks] = useState<AvailabilityBlock[]>([]);
+  const [blocksLoading, setBlocksLoading] = useState(false);
+  const [availDate, setAvailDate] = useState('');
+  const [availStart, setAvailStart] = useState('09:00');
+  const [availEnd, setAvailEnd] = useState('14:00');
+  const [addingBlock, setAddingBlock] = useState(false);
 
   useEffect(() => {
     if (authLoading) return;
@@ -160,6 +185,67 @@ export function DoctorManager() {
     }
   }
 
+  async function openAvailability(doctor: Doctor) {
+    setAvailDoctor(doctor);
+    setBlocks([]);
+    setAvailDate('');
+    setBlocksLoading(true);
+    try {
+      const res = await fetch(`/api/doctors/${doctor.id}/availability`);
+      if (!res.ok) throw new Error('load failed');
+      const data = (await res.json()) as { blocks: AvailabilityBlock[] };
+      setBlocks(data.blocks ?? []);
+    } catch (err) {
+      console.error('Load availability error:', err);
+      toast.error(ta('loadFailed'));
+    } finally {
+      setBlocksLoading(false);
+    }
+  }
+
+  async function addBlock() {
+    if (!availDoctor || !availDate) return;
+    if (availEnd <= availStart) {
+      toast.error(ta('invalidRange'));
+      return;
+    }
+    try {
+      setAddingBlock(true);
+      const res = await fetch(`/api/doctors/${availDoctor.id}/availability`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ date: availDate, start: availStart, end: availEnd }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'add failed');
+      setBlocks((prev) =>
+        [...prev, data.block as AvailabilityBlock].sort((a, b) => a.start_at.localeCompare(b.start_at)),
+      );
+      toast.success(ta('added'));
+    } catch (err) {
+      console.error('Add block error:', err);
+      toast.error(ta('addFailed'));
+    } finally {
+      setAddingBlock(false);
+    }
+  }
+
+  async function removeBlock(blockId: string) {
+    if (!availDoctor) return;
+    try {
+      const res = await fetch(
+        `/api/doctors/${availDoctor.id}/availability?block_id=${encodeURIComponent(blockId)}`,
+        { method: 'DELETE' },
+      );
+      if (!res.ok) throw new Error('delete failed');
+      setBlocks((prev) => prev.filter((b) => b.id !== blockId));
+      toast.success(ta('removed'));
+    } catch (err) {
+      console.error('Remove block error:', err);
+      toast.error(ta('removeFailed'));
+    }
+  }
+
   // A member already linked to another doctor shouldn't show as
   // pickable for this one — doctors.user_id is unique per account.
   const linkedUserIds = new Set(doctors.map((d) => d.user_id).filter(Boolean));
@@ -209,6 +295,17 @@ export function DoctorManager() {
                             </option>
                           ))}
                       </select>
+                      {canManageAvailability && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => openAvailability(doctor)}
+                          className="h-7 gap-1 px-2 text-xs"
+                        >
+                          <CalendarClock className="size-3.5" />
+                          {ta('button')}
+                        </Button>
+                      )}
                       <Switch
                         checked={doctor.is_active}
                         onCheckedChange={() => toggleActive(doctor)}
@@ -258,6 +355,89 @@ export function DoctorManager() {
           </>
         )}
       </CardContent>
+
+      <Dialog open={!!availDoctor} onOpenChange={(open) => !open && setAvailDoctor(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>{ta('title', { name: availDoctor?.name ?? '' })}</DialogTitle>
+            <DialogDescription>{ta('description')}</DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-3">
+            {blocksLoading ? (
+              <div className="flex items-center justify-center py-6">
+                <Loader2 className="size-5 animate-spin text-primary" />
+              </div>
+            ) : blocks.length > 0 ? (
+              <div className="space-y-1.5">
+                {blocks.map((b) => (
+                  <div
+                    key={b.id}
+                    className="flex items-center justify-between gap-2 rounded-lg border border-border bg-muted/40 px-3 py-1.5 text-sm"
+                  >
+                    <span className="text-foreground">
+                      {blockDateFmt.format(new Date(b.start_at))} · {blockTimeFmt.format(new Date(b.start_at))}
+                      {' – '}
+                      {blockTimeFmt.format(new Date(b.end_at))}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => removeBlock(b.id)}
+                      aria-label={ta('removeAria')}
+                      className="rounded-full p-1 text-muted-foreground opacity-60 transition-opacity hover:bg-black/10 hover:opacity-100 dark:hover:bg-white/10"
+                    >
+                      <X className="size-3.5" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">{ta('empty')}</p>
+            )}
+
+            <div className="flex flex-wrap items-end gap-2 border-t border-border pt-3">
+              <div className="space-y-1">
+                <label className="text-xs text-muted-foreground">{ta('dateLabel')}</label>
+                <Input
+                  type="date"
+                  value={availDate}
+                  min={new Date().toISOString().slice(0, 10)}
+                  onChange={(e) => setAvailDate(e.target.value)}
+                  className="w-[150px]"
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs text-muted-foreground">{ta('startLabel')}</label>
+                <Input
+                  type="time"
+                  value={availStart}
+                  onChange={(e) => setAvailStart(e.target.value)}
+                  className="w-[110px]"
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs text-muted-foreground">{ta('endLabel')}</label>
+                <Input
+                  type="time"
+                  value={availEnd}
+                  onChange={(e) => setAvailEnd(e.target.value)}
+                  className="w-[110px]"
+                />
+              </div>
+              <Button size="sm" onClick={addBlock} disabled={addingBlock || !availDate}>
+                {addingBlock ? <Loader2 className="size-4 animate-spin" /> : <Plus className="size-4" />}
+                {ta('add')}
+              </Button>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setAvailDoctor(null)}>
+              {ta('close')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <DialogContent className="sm:max-w-sm">
