@@ -26,7 +26,15 @@ export function PushRegistration() {
 
   useEffect(() => {
     const pushEnabled = process.env.NEXT_PUBLIC_FIREBASE_PUSH_ENABLED === "true";
-    if (!user || !pushEnabled || !Capacitor.isNativePlatform()) return;
+    const native = Capacitor.isNativePlatform();
+
+    // TEMP DIAG — reporta al log del servidor qué gate corta el registro.
+    // Quitar una vez confirmado el push (buscar "push/diag" en los logs).
+    void fetch(
+      `/api/push/register?diag=1&native=${native}&enabled=${pushEnabled}&user=${!!user}`,
+    ).catch(() => {});
+
+    if (!user || !pushEnabled || !native) return;
 
     let registrationHandle: { remove: () => void } | undefined;
     let errorHandle: { remove: () => void } | undefined;
