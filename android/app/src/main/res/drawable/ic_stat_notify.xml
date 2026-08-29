@@ -1,0 +1,11 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <!-- Imagotipo "+" de Zuhma, monocromo (los íconos de notificación se
+         tiñen por alpha; el color real lo pone default_notification_color). -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M10,4 h4 v6 h6 v4 h-6 v6 h-4 v-6 h-6 v-4 h6 Z" />
+</vector>

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Coral de marca Zuhma; tiñe el ícono "+" en la barra de estado. -->
+    <color name="notification_color">#F94B5A</color>
+</resources>

@@ -1,0 +1,259 @@
+"use client";
+
+import { Suspense, useEffect, useState } from "react";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { createClient } from "@/lib/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/auth/password-input";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { CheckCircle, UsersRound } from "lucide-react";
+import { getPasswordStrengthError } from "@/lib/password-strength";
+
+// Zuhma Med CRM has no public self-serve signup — every account is
+// created by Zuhma staff from /admin (see POST
+// /api/platform-admin/accounts). This page ONLY handles the
+// invite-acceptance path: a teammate invited into an EXISTING
+// account via /join/<token>. Without an invite token there's nothing
+// for this page to do, so it redirects to /login.
+export default function SignupPage() {
+  return (
+    <Suspense fallback={null}>
+      <SignupPageInner />
+    </Suspense>
+  );
+}
+
+function SignupPageInner() {
+  const t = useTranslations("SignupPage");
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  // When the user lands here from `/join/<token>` we carry the
+  // invite token in the query so it survives the signup → email
+  // verification → redirect round-trip. `emailRedirectTo` below
+  // points back at /join/<token> so the user lands on the redeem
+  // step after verifying instead of being dropped on /dashboard.
+  const inviteToken = searchParams.get("invite");
+
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const supabase = createClient();
+
+  useEffect(() => {
+    if (!inviteToken) {
+      router.replace("/login");
+    }
+  }, [inviteToken, router]);
+
+  const handleSignup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+
+    if (password !== confirmPassword) {
+      setError(t("passwordMismatch"));
+      return;
+    }
+
+    const strengthError = getPasswordStrengthError(password);
+    if (strengthError) {
+      setError(t(`passwordRule_${strengthError}` as Parameters<typeof t>[0]));
+      return;
+    }
+
+    setLoading(true);
+
+    const next = `/join/${encodeURIComponent(inviteToken!)}`;
+    const emailRedirectTo = `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`;
+
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          full_name: fullName,
+        },
+        emailRedirectTo,
+      },
+    });
+
+    if (error) {
+      setError(error.message);
+      setLoading(false);
+      return;
+    }
+
+    // If "Confirm email" is off in Supabase Auth settings, signUp()
+    // returns an already-active session instead of requiring a click
+    // on a confirmation link — the emailRedirectTo above then never
+    // fires, since there's no email round-trip. Send them where the
+    // redirect would have gone, right now, client-side.
+    if (data.session) {
+      window.location.href = next;
+      return;
+    }
+
+    setSuccess(true);
+    setLoading(false);
+  };
+
+  if (!inviteToken) {
+    return null;
+  }
+
+  if (success) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background px-4">
+        <Card className="w-full max-w-md border-border bg-card">
+          <CardHeader className="items-center text-center">
+            <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
+              <CheckCircle className="h-6 w-6 text-primary" />
+            </div>
+            <CardTitle className="text-xl text-foreground">
+              {t("checkEmailTitle")}
+            </CardTitle>
+            <CardDescription className="text-muted-foreground">
+              {t.rich("checkEmailDesc", {
+                email,
+                bold: (chunks: React.ReactNode) => <span className="text-foreground">{chunks}</span>,
+              })}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Link
+              href={
+                inviteToken
+                  ? `/login?invite=${encodeURIComponent(inviteToken)}`
+                  : "/login"
+              }
+            >
+              <Button
+                variant="outline"
+                className="w-full border-border text-muted-foreground hover:bg-muted hover:text-foreground"
+              >
+                {t("backToSignIn")}
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-background px-4">
+      <Card className="w-full max-w-md border-border bg-card">
+        <CardHeader className="items-center text-center">
+          <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
+            <UsersRound className="h-6 w-6 text-primary" />
+          </div>
+          <CardTitle className="text-xl text-foreground">{t("titleInvite")}</CardTitle>
+          <CardDescription className="text-muted-foreground">{t("descInvite")}</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSignup} className="flex flex-col gap-4">
+            {error && (
+              <div className="rounded-lg border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">
+                {error}
+              </div>
+            )}
+
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="fullName" className="text-muted-foreground">
+                {t("fullNameLabel")}
+              </Label>
+              <Input
+                id="fullName"
+                type="text"
+                placeholder={t("fullNamePlaceholder")}
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                required
+                className="border-border bg-muted text-foreground placeholder:text-muted-foreground focus-visible:border-primary focus-visible:ring-primary/20"
+              />
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="email" className="text-muted-foreground">
+                {t("emailLabel")}
+              </Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder={t("emailPlaceholder")}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="border-border bg-muted text-foreground placeholder:text-muted-foreground focus-visible:border-primary focus-visible:ring-primary/20"
+              />
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="password" className="text-muted-foreground">
+                {t("passwordLabel")}
+              </Label>
+              <PasswordInput
+                id="password"
+                placeholder={t("passwordPlaceholder")}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="border-border bg-muted text-foreground placeholder:text-muted-foreground focus-visible:border-primary focus-visible:ring-primary/20"
+              />
+              <p className="text-xs text-muted-foreground">{t("passwordHint")}</p>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="confirmPassword" className="text-muted-foreground">
+                {t("confirmPasswordLabel")}
+              </Label>
+              <PasswordInput
+                id="confirmPassword"
+                placeholder={t("confirmPasswordPlaceholder")}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+                className="border-border bg-muted text-foreground placeholder:text-muted-foreground focus-visible:border-primary focus-visible:ring-primary/20"
+              />
+            </div>
+
+            <Button
+              type="submit"
+              disabled={loading}
+              className="mt-2 h-10 w-full bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+            >
+              {loading ? t("creatingAccount") : t("createAccount")}
+            </Button>
+          </form>
+
+          <p className="mt-6 text-center text-sm text-muted-foreground">
+            {t("haveAccount")}{" "}
+            <Link
+              href={
+                inviteToken
+                  ? `/login?invite=${encodeURIComponent(inviteToken)}`
+                  : "/login"
+              }
+              className="text-primary hover:text-primary/80"
+            >
+              {t("signIn")}
+            </Link>
+          </p>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
