@@ -20,7 +20,7 @@ export const metadata: Metadata = {
 const EFFECTIVE_DATE = "1 de mayo de 2026";
 const VERSION = "2026-07-22";
 const LEGAL_NAME = "Zuhma S.A.P.I. de C.V.";
-const RFC = "[RFC]";
+const RFC = "ZUH250425918";
 const DOMICILIO =
   "Calle Recreo No. 13, Int. 201, Col. Actipan, Alcaldía Benito Juárez, C.P. 03230, Ciudad de México";
 const JURISDICCION = "Ciudad de México";
