@@ -20,10 +20,11 @@ export const metadata: Metadata = {
 // permisos de Google Calendar. No la elimines ni la debilites.
 // ============================================================
 
-const EFFECTIVE_DATE = "[FECHA DE ENTRADA EN VIGOR]";
+const EFFECTIVE_DATE = "1 de mayo de 2026";
 const VERSION = "2026-08-31";
-const LEGAL_NAME = "[RAZÓN SOCIAL COMPLETA], [tipo de sociedad]";
-const DOMICILIO = "[DOMICILIO COMPLETO]";
+const LEGAL_NAME = "Zuhma S.A.P.I. de C.V.";
+const DOMICILIO =
+  "Calle Recreo No. 13, Int. 201, Col. Actipan, Alcaldía Benito Juárez, C.P. 03230, Ciudad de México";
 const CONTACTO = "soporte@zuhma.com";
 
 interface Clause {

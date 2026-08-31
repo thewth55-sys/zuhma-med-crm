@@ -17,13 +17,14 @@ export const metadata: Metadata = {
 // TERMS_VERSION en src/lib/auth/activation-code.ts.
 // ============================================================
 
-const EFFECTIVE_DATE = "[FECHA DE ENTRADA EN VIGOR]";
+const EFFECTIVE_DATE = "1 de mayo de 2026";
 const VERSION = "2026-07-22";
-const LEGAL_NAME = "[RAZÓN SOCIAL COMPLETA], [tipo de sociedad]";
+const LEGAL_NAME = "Zuhma S.A.P.I. de C.V.";
 const RFC = "[RFC]";
-const DOMICILIO = "[DOMICILIO FISCAL COMPLETO]";
-const JURISDICCION = "[CIUDAD Y ESTADO]";
-const CONTACTO = "[correo de contacto legal]";
+const DOMICILIO =
+  "Calle Recreo No. 13, Int. 201, Col. Actipan, Alcaldía Benito Juárez, C.P. 03230, Ciudad de México";
+const JURISDICCION = "Ciudad de México";
+const CONTACTO = "soporte@zuhma.com";
 
 interface Clause {
   title: string;
