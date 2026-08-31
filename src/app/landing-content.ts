@@ -69,6 +69,7 @@ export const LANDING_HTML = `<style>
   .brand .wm { font-weight: 700; }
   .brand .plus-mark { width: 13px; height: 13px; flex: none; margin-left: 2px; transform: translateY(-.46em); }
   .brand .med { font-weight: 600; font-size: .62em; letter-spacing: -.01em; color: var(--muted); margin-left: 8px; align-self: center; }
+  .brand .logo-img { height: 30px; width: auto; display: block; }
   .nav-links { display: flex; align-items: center; gap: 28px; }
   .nav-links a { font-size: 15px; font-weight: 500; color: var(--ink-soft); }
   .nav-links a:hover { color: var(--brand-strong); }
@@ -176,6 +177,7 @@ export const LANDING_HTML = `<style>
   footer.site { border-top: 1px solid var(--line); background: #fff; padding: 40px 0 46px; margin-top: 0; }
   .foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 18px; }
   .foot .brand { font-size: 18px; }
+  .foot .brand .logo-img { height: 26px; }
   .foot .links { display: flex; flex-wrap: wrap; gap: 22px; font-size: 14.5px; color: var(--muted); }
   .foot .links a:hover { color: var(--brand-strong); }
   .foot .copy { width: 100%; color: var(--muted); font-size: 13.5px; padding-top: 8px; }
@@ -199,7 +201,7 @@ export const LANDING_HTML = `<style>
 
 <header class="site">
   <div class="wrap nav">
-    <a class="brand" href="#top"><span class="wm">zuhma</span><svg class="plus-mark" viewBox="0 0 24 24"><use href="#plus"/></svg><span class="med">Med</span></a>
+    <a class="brand" href="#top"><img class="logo-img" src="/zuhma-logo.png" alt="Zuhma Med" width="99" height="30"/></a>
     <nav class="nav-links">
       <a href="#que-hace">Qué hace</a>
       <a href="#como">Cómo funciona</a>
@@ -387,7 +389,7 @@ export const LANDING_HTML = `<style>
 
 <footer class="site">
   <div class="wrap foot">
-    <a class="brand" href="#top"><span class="wm">zuhma</span><svg class="plus-mark" viewBox="0 0 24 24"><use href="#plus"/></svg><span class="med">Med</span></a>
+    <a class="brand" href="#top"><img class="logo-img" src="/zuhma-logo.png" alt="Zuhma Med" width="99" height="30"/></a>
     <div class="links">
       <a href="#que-hace">Qué hace</a>
       <a href="#como">Cómo funciona</a>
