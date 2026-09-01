@@ -4,13 +4,14 @@
 // Crea una cuenta DEMO totalmente poblada (contactos, conversaciones
 // tipo WhatsApp, perfiles de paciente y agenda — ver demo-seed.ts) para
 // dar demos en vivo del producto vía "Impersonar", en vez de un
-// dashboard vacío. No se invita ningún correo real: el usuario dueño se
-// crea directo con la admin API y un correo interno no entregable, solo
-// para que el trigger handle_new_user() y la impersonación funcionen sin
-// cambios. Se etiqueta "Demo" y se puede eliminar desde el panel.
+// dashboard vacío. El usuario dueño se crea directo con la admin API con
+// un correo interno no entregable PERO con contraseña generada, así la
+// cuenta también se puede entregar con login propio (ventas o revisores
+// externos); ese login salta el 2FA por ser cuenta demo. Se etiqueta
+// "Demo" y se puede eliminar desde el panel.
 // ============================================================
 
-import { randomUUID } from "node:crypto";
+import { randomBytes, randomUUID } from "node:crypto";
 import { NextResponse } from "next/server";
 
 import { requirePlatformAdmin, logPlatformAdminAction } from "@/lib/auth/platform-admin";
@@ -34,9 +35,16 @@ export async function POST(request: Request) {
 
     const admin = supabaseAdmin();
     const demoEmail = `demo-${randomUUID().slice(0, 8)}${DEMO_EMAIL_DOMAIN}`;
+    // Contraseña generada: la cuenta demo queda con login propio (además de la
+    // impersonación) para poder entregarla a externos —ventas o revisores como
+    // la verificación OAuth de Google—. Como es cuenta demo, ese login salta el
+    // 2FA (ver api/auth/login). Se devuelve una sola vez para que el admin la
+    // copie; el correo interno no es entregable pero sí sirve para iniciar sesión.
+    const demoPassword = randomBytes(9).toString("base64url");
 
     const { data: created, error: createErr } = await admin.auth.admin.createUser({
       email: demoEmail,
+      password: demoPassword,
       email_confirm: true,
       user_metadata: { full_name: "Cuenta demo", brand_name: name },
     });
@@ -88,7 +96,7 @@ export async function POST(request: Request) {
       metadata: { accountName: name },
     });
 
-    return NextResponse.json({ accountId: account.id, ownerEmail: demoEmail });
+    return NextResponse.json({ accountId: account.id, ownerEmail: demoEmail, password: demoPassword });
   } catch (err) {
     return toErrorResponse(err);
   }

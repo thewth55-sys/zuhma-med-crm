@@ -63,6 +63,7 @@ export default function AdminAccountsPage() {
   const [demoOpen, setDemoOpen] = useState(false);
   const [creatingDemo, setCreatingDemo] = useState(false);
   const [demoName, setDemoName] = useState("");
+  const [demoCreds, setDemoCreds] = useState<{ email: string; password: string } | null>(null);
 
   async function loadAccounts() {
     try {
@@ -119,8 +120,8 @@ export default function AdminAccountsPage() {
       const body = await res.json().catch(() => null);
       if (!res.ok) throw new Error(body?.error ?? "No se pudo crear la cuenta demo");
       toast.success("Cuenta demo creada con datos de ejemplo");
-      setDemoOpen(false);
       setDemoName("");
+      setDemoCreds({ email: body.ownerEmail, password: body.password });
       void loadAccounts();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "No se pudo crear la cuenta demo");
@@ -298,35 +299,74 @@ export default function AdminAccountsPage() {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={demoOpen} onOpenChange={setDemoOpen}>
+      <Dialog
+        open={demoOpen}
+        onOpenChange={(o) => {
+          setDemoOpen(o);
+          if (!o) setDemoCreds(null);
+        }}
+      >
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Nueva cuenta demo</DialogTitle>
             <DialogDescription>
               Crea una cuenta de ejemplo ya poblada (contactos, conversaciones, pacientes y agenda)
-              para demos en vivo. No envía ningún correo; impersónala para mostrarla. Se puede eliminar
-              después desde el menú de Acciones.
+              para demos en vivo. Puedes impersonarla o entregar sus credenciales de acceso; el login
+              de una cuenta demo salta el 2FA. Se puede eliminar después desde el menú de Acciones.
             </DialogDescription>
           </DialogHeader>
-          <form onSubmit={handleCreateDemo} className="flex flex-col gap-4">
-            <div className="flex flex-col gap-2">
-              <label className="text-sm text-muted-foreground">Nombre de la clínica (demo)</label>
-              <Input
-                value={demoName}
-                onChange={(e) => setDemoName(e.target.value)}
-                placeholder="Clínica Demo Zuhma"
-                required
-              />
+          {demoCreds ? (
+            <div className="flex flex-col gap-4">
+              <div className="rounded-lg border border-border bg-muted/40 p-3 text-sm">
+                <p className="mb-2 font-medium text-foreground">
+                  Credenciales de acceso — guárdalas, no se vuelven a mostrar:
+                </p>
+                <p className="break-all">
+                  <span className="text-muted-foreground">Correo:</span>{" "}
+                  <span className="font-mono">{demoCreds.email}</span>
+                </p>
+                <p className="break-all">
+                  <span className="text-muted-foreground">Contraseña:</span>{" "}
+                  <span className="font-mono">{demoCreds.password}</span>
+                </p>
+                <p className="mt-2 text-xs text-muted-foreground">
+                  Inicia sesión en /login con estas credenciales (sin 2FA). Ideal para ventas o para
+                  entregar a un revisor externo (p. ej. la verificación OAuth de Google).
+                </p>
+              </div>
+              <DialogFooter>
+                <Button
+                  type="button"
+                  onClick={() => {
+                    setDemoOpen(false);
+                    setDemoCreds(null);
+                  }}
+                >
+                  Listo
+                </Button>
+              </DialogFooter>
             </div>
-            <DialogFooter>
-              <Button type="button" variant="ghost" onClick={() => setDemoOpen(false)} disabled={creatingDemo}>
-                Cancelar
-              </Button>
-              <Button type="submit" disabled={creatingDemo || !demoName.trim()}>
-                {creatingDemo ? "Creando…" : "Crear demo"}
-              </Button>
-            </DialogFooter>
-          </form>
+          ) : (
+            <form onSubmit={handleCreateDemo} className="flex flex-col gap-4">
+              <div className="flex flex-col gap-2">
+                <label className="text-sm text-muted-foreground">Nombre de la clínica (demo)</label>
+                <Input
+                  value={demoName}
+                  onChange={(e) => setDemoName(e.target.value)}
+                  placeholder="Clínica Demo Zuhma"
+                  required
+                />
+              </div>
+              <DialogFooter>
+                <Button type="button" variant="ghost" onClick={() => setDemoOpen(false)} disabled={creatingDemo}>
+                  Cancelar
+                </Button>
+                <Button type="submit" disabled={creatingDemo || !demoName.trim()}>
+                  {creatingDemo ? "Creando…" : "Crear demo"}
+                </Button>
+              </DialogFooter>
+            </form>
+          )}
         </DialogContent>
       </Dialog>
     </div>
