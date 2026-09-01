@@ -51,6 +51,25 @@ function nonPersistingClient() {
 }
 
 /**
+ * ¿El correo está exento del 2FA de dispositivo nuevo? Se usa SOLO para
+ * cuentas de prueba que se entregan a revisores externos (p. ej. la
+ * verificación OAuth de Google), que no pueden leer el código enviado al
+ * buzón de la cuenta. Lista separada por comas en `TWO_FACTOR_EXEMPT_EMAILS`;
+ * comparación exacta e insensible a mayúsculas. Sin la env, NADIE está
+ * exento (comportamiento normal). Quitar la env tras la revisión.
+ */
+function isTwoFactorExempt(email: string): boolean {
+  const raw = process.env.TWO_FACTOR_EXEMPT_EMAILS;
+  if (!raw) return false;
+  const target = email.trim().toLowerCase();
+  return raw
+    .split(",")
+    .map((e) => e.trim().toLowerCase())
+    .filter(Boolean)
+    .includes(target);
+}
+
+/**
  * Paso 1 del login. Verifica captcha + credenciales. Si el dispositivo
  * es de confianza (cookie válida) crea la sesión y termina. Si no, genera
  * un código 2FA, lo manda por correo y responde `mfaRequired` SIN crear
@@ -129,6 +148,23 @@ export async function POST(request: Request) {
       }
       return NextResponse.json({ success: true });
     }
+  }
+
+  // Cuenta de prueba exenta de 2FA (revisores externos que no pueden leer
+  // el código del buzón). Solo aplica a los correos exactos de
+  // TWO_FACTOR_EXEMPT_EMAILS; no afecta a ningún otro usuario. Crea la
+  // sesión directo, igual que un dispositivo de confianza.
+  if (isTwoFactorExempt(email)) {
+    const supabase = await createClient();
+    const { error } = await supabase.auth.setSession({
+      access_token: session.access_token,
+      refresh_token: session.refresh_token,
+    });
+    if (error) {
+      return NextResponse.json({ error: "Could not start session" }, { status: 500 });
+    }
+    console.warn(`[auth/login] 2FA omitido para correo exento: ${email}`);
+    return NextResponse.json({ success: true });
   }
 
   // Dispositivo nuevo → emitir reto 2FA.
