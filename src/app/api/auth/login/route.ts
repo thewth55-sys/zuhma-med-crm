@@ -51,22 +51,28 @@ function nonPersistingClient() {
 }
 
 /**
- * ¿El correo está exento del 2FA de dispositivo nuevo? Se usa SOLO para
- * cuentas de prueba que se entregan a revisores externos (p. ej. la
- * verificación OAuth de Google), que no pueden leer el código enviado al
- * buzón de la cuenta. Lista separada por comas en `TWO_FACTOR_EXEMPT_EMAILS`;
- * comparación exacta e insensible a mayúsculas. Sin la env, NADIE está
- * exento (comportamiento normal). Quitar la env tras la revisión.
+ * ¿El usuario pertenece a una cuenta demo? Las cuentas demo (`is_demo`, ver
+ * 078_account_is_demo) existen para mostrar la app a personas externas
+ * —ventas y revisores externos como la verificación OAuth de Google—: no
+ * tienen datos reales de pacientes ni envío a Meta. Por eso saltan el 2FA
+ * de dispositivo nuevo, para que quien recibe la cuenta pueda entrar sin
+ * depender del código que llega al buzón. Las cuentas reales
+ * (`is_demo = false`) no se ven afectadas.
  */
-function isTwoFactorExempt(email: string): boolean {
-  const raw = process.env.TWO_FACTOR_EXEMPT_EMAILS;
-  if (!raw) return false;
-  const target = email.trim().toLowerCase();
-  return raw
-    .split(",")
-    .map((e) => e.trim().toLowerCase())
-    .filter(Boolean)
-    .includes(target);
+async function userAccountIsDemo(userId: string): Promise<boolean> {
+  const admin = supabaseAdmin();
+  const { data: profile } = await admin
+    .from("profiles")
+    .select("account_id")
+    .eq("user_id", userId)
+    .maybeSingle();
+  if (!profile?.account_id) return false;
+  const { data: account } = await admin
+    .from("accounts")
+    .select("is_demo")
+    .eq("id", profile.account_id)
+    .maybeSingle();
+  return account?.is_demo === true;
 }
 
 /**
@@ -150,11 +156,11 @@ export async function POST(request: Request) {
     }
   }
 
-  // Cuenta de prueba exenta de 2FA (revisores externos que no pueden leer
-  // el código del buzón). Solo aplica a los correos exactos de
-  // TWO_FACTOR_EXEMPT_EMAILS; no afecta a ningún otro usuario. Crea la
-  // sesión directo, igual que un dispositivo de confianza.
-  if (isTwoFactorExempt(email)) {
+  // Cuentas demo → saltan el 2FA (ver userAccountIsDemo). Pensado para
+  // mostrar la app a externos (ventas / revisores OAuth de Google) sin que
+  // el código del buzón los bloquee. Crea la sesión directo, igual que un
+  // dispositivo de confianza. Las cuentas reales no se ven afectadas.
+  if (await userAccountIsDemo(user.id)) {
     const supabase = await createClient();
     const { error } = await supabase.auth.setSession({
       access_token: session.access_token,
@@ -163,7 +169,7 @@ export async function POST(request: Request) {
     if (error) {
       return NextResponse.json({ error: "Could not start session" }, { status: 500 });
     }
-    console.warn(`[auth/login] 2FA omitido para correo exento: ${email}`);
+    console.warn(`[auth/login] 2FA omitido para cuenta demo: ${email}`);
     return NextResponse.json({ success: true });
   }
 
