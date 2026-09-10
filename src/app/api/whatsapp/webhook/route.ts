@@ -201,8 +201,10 @@ export async function POST(request: Request) {
   // its OWN Meta app: resolve its per-account app secret from the
   // payload's phone_number_id/WABA and try that (BYO WABA).
   let signatureOk = verifyMetaWebhookSignature(rawBody, signature)
+  let perAccountResolved = false
   if (!signatureOk) {
     const accountSecret = await resolveAccountAppSecret(rawBody)
+    perAccountResolved = !!accountSecret
     if (accountSecret) {
       signatureOk = signatureMatchesSecret(rawBody, signature, accountSecret)
     }
@@ -210,8 +212,21 @@ export async function POST(request: Request) {
   if (!signatureOk) {
     // 401 (not 200) — we want Meta's delivery dashboard to show failures
     // loudly if a misconfiguration causes signatures to stop matching,
-    // rather than silently eating events.
-    console.warn('[webhook] rejected request with invalid signature')
+    // rather than silently eating events. Diagnostic fields (no secrets):
+    //   globalSecretSet          — is META_APP_SECRET configured?
+    //   perAccountSecretResolved — did we find+decrypt an account app_secret?
+    //   phoneNumberId            — real message vs Meta "Probar" sample?
+    let debugPnid: string | undefined
+    try {
+      const p = JSON.parse(rawBody)
+      debugPnid = p?.entry?.[0]?.changes?.[0]?.value?.metadata?.phone_number_id
+    } catch {}
+    console.warn('[webhook] rejected request with invalid signature', {
+      globalSecretSet: !!process.env.META_APP_SECRET,
+      perAccountSecretResolved: perAccountResolved,
+      hasSignatureHeader: !!signature,
+      phoneNumberId: debugPnid ?? null,
+    })
     return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
   }
 
