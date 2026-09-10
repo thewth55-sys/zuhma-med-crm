@@ -22,14 +22,13 @@
 import { randomUUID } from 'node:crypto';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
+import { type MediaKind } from '@/lib/whatsapp/meta-api';
 import {
-  sendTextMessage,
-  sendTemplateMessage,
-  sendMediaMessage,
-  sendInteractiveButtons,
-  sendInteractiveList,
-  type MediaKind,
-} from '@/lib/whatsapp/meta-api';
+  getSender,
+  assertProviderSupports,
+  UnsupportedOnProviderError,
+  type OutboundMessageKind,
+} from '@/lib/whatsapp/provider-dispatch';
 import {
   validateInteractivePayload,
   interactivePayloadPreviewText,
@@ -269,16 +268,71 @@ export async function sendMessageToConversation(
     .maybeSingle();
   const isDemo = acct?.is_demo === true;
 
-  // WhatsApp config, account-scoped. Solo para cuentas reales — las demo
-  // no tienen config y puentean Meta más abajo.
-  let config: { id: string; phone_number_id: string; access_token: string } | null = null;
+  // WhatsApp config for THIS conversation's line, not just "the
+  // account's config" — an account can have up to two rows now (Cloud
+  // API + QR, see migration 086), and a reply has to go back out the
+  // same line the contact is talking to (migration 087). Solo para
+  // cuentas reales — las demo no tienen config y puentean Meta más abajo.
+  interface ResolvedWhatsAppConfig {
+    id: string;
+    provider: 'cloud_api' | 'qr';
+    phone_number_id: string | null;
+    access_token: string | null;
+    account_id: string;
+  }
+  let config: ResolvedWhatsAppConfig | null = null;
   let accessToken = '';
   if (!isDemo) {
-    const { data: cfg, error: configError } = await db
-      .from('whatsapp_config')
-      .select('*')
-      .eq('account_id', accountId)
-      .single();
+    let cfg: ResolvedWhatsAppConfig | null = null;
+    let configError: { message: string } | null = null;
+
+    if (conversation.whatsapp_config_id) {
+      const result = await db
+        .from('whatsapp_config')
+        .select('*')
+        .eq('id', conversation.whatsapp_config_id)
+        .maybeSingle();
+      cfg = result.data;
+      configError = result.error;
+    }
+
+    if (!cfg && !configError) {
+      // Fallback for conversations that predate the whatsapp_config_id
+      // column (migration 087 backfills these, but a row created in the
+      // gap before that migration ran wouldn't have it) — safe only
+      // when the account has exactly one line, since with two there's
+      // no way to guess which one this conversation belongs to.
+      const { data: rows, error } = await db
+        .from('whatsapp_config')
+        .select('*')
+        .eq('account_id', accountId);
+      if (error) {
+        configError = error;
+      } else if (rows && rows.length === 1) {
+        cfg = rows[0];
+        // Self-heal: stamp the resolved line onto the conversation so
+        // future sends (and inbound routing) don't need this fallback
+        // again. Fire-and-forget; idempotent. Captured as a local const
+        // (not `cfg` itself) so the closure doesn't force TS to widen
+        // `cfg`'s narrowed type for the rest of this function.
+        const resolvedConfigId = rows[0].id;
+        void db
+          .from('conversations')
+          .update({ whatsapp_config_id: resolvedConfigId })
+          .eq('id', conversationId)
+          .then(({ error: updErr }: { error: { message: string } | null }) => {
+            if (updErr) {
+              console.warn('[send-message] whatsapp_config_id backfill failed:', updErr.message);
+            }
+          });
+      } else if (rows && rows.length > 1) {
+        throw new SendMessageError(
+          'bad_request',
+          'This conversation is not linked to a specific WhatsApp line, and this account has more than one configured. Reopen the conversation from the inbox so it can be re-linked.',
+          409
+        );
+      }
+    }
 
     if (configError || !cfg) {
       throw new SendMessageError(
@@ -287,23 +341,43 @@ export async function sendMessageToConversation(
         400
       );
     }
-    config = cfg;
-    accessToken = decrypt(cfg.access_token);
+    // `cfg`'s narrowed type gets muddied by the closure above and the
+    // multiple conditional reassignments before it — reasserting the
+    // non-null shape here (already guaranteed by the throw above) gives
+    // `config` a clean type for the rest of this function instead of
+    // sprinkling `!` on every later access.
+    const resolvedConfig = cfg as ResolvedWhatsAppConfig;
+    config = resolvedConfig;
 
-    // Self-heal legacy CBC ciphertexts. Fire-and-forget; idempotent.
-    if (isLegacyFormat(cfg.access_token)) {
-      void db
-        .from('whatsapp_config')
-        .update({ access_token: encrypt(accessToken) })
-        .eq('id', cfg.id)
-        .then(({ error }: { error: { message: string } | null }) => {
-          if (error) {
-            console.warn(
-              '[send-message] access_token GCM upgrade failed:',
-              error.message
-            );
-          }
-        });
+    if (resolvedConfig.provider === 'cloud_api') {
+      accessToken = decrypt(resolvedConfig.access_token!);
+
+      // Self-heal legacy CBC ciphertexts. Fire-and-forget; idempotent.
+      if (isLegacyFormat(resolvedConfig.access_token!)) {
+        void db
+          .from('whatsapp_config')
+          .update({ access_token: encrypt(accessToken) })
+          .eq('id', resolvedConfig.id)
+          .then(({ error }: { error: { message: string } | null }) => {
+            if (error) {
+              console.warn(
+                '[send-message] access_token GCM upgrade failed:',
+                error.message
+              );
+            }
+          });
+      }
+    }
+
+    // Fail fast (before any network call) when this message type isn't
+    // available on the resolved provider yet — see provider-dispatch.ts.
+    try {
+      assertProviderSupports(resolvedConfig.provider, messageType as OutboundMessageKind);
+    } catch (err) {
+      if (err instanceof UnsupportedOnProviderError) {
+        throw new SendMessageError('bad_request', err.message, 400);
+      }
+      throw err;
     }
   }
 
@@ -356,11 +430,13 @@ export async function sendMessageToConversation(
     templateRow = data ?? null;
   }
 
+  // Resolved once per send — picks Meta Cloud API or the QR gateway
+  // based on config.provider. See provider-dispatch.ts.
+  const sender = config ? getSender(config, accessToken) : null;
+
   const attempt = async (phone: string): Promise<string> => {
     if (messageType === 'template') {
-      const result = await sendTemplateMessage({
-        phoneNumberId: config!.phone_number_id,
-        accessToken,
+      const result = await sender!.sendTemplate!({
         to: phone,
         templateName: templateName!,
         language: templateLanguage || 'en_US',
@@ -372,9 +448,7 @@ export async function sendMessageToConversation(
       return result.messageId;
     }
     if (isMediaKind) {
-      const result = await sendMediaMessage({
-        phoneNumberId: config!.phone_number_id,
-        accessToken,
+      const result = await sender!.sendMedia!({
         to: phone,
         kind: messageType as MediaKind,
         link: mediaUrl!,
@@ -387,9 +461,7 @@ export async function sendMessageToConversation(
     if (messageType === 'interactive') {
       const p = interactivePayload!;
       if (p.kind === 'buttons') {
-        const result = await sendInteractiveButtons({
-          phoneNumberId: config!.phone_number_id,
-          accessToken,
+        const result = await sender!.sendInteractiveButtons!({
           to: phone,
           bodyText: p.body,
           headerText: p.header || undefined,
@@ -399,9 +471,7 @@ export async function sendMessageToConversation(
         });
         return result.messageId;
       }
-      const result = await sendInteractiveList({
-        phoneNumberId: config!.phone_number_id,
-        accessToken,
+      const result = await sender!.sendInteractiveList!({
         to: phone,
         bodyText: p.body,
         buttonLabel: p.button_label,
@@ -412,9 +482,7 @@ export async function sendMessageToConversation(
       });
       return result.messageId;
     }
-    const result = await sendTextMessage({
-      phoneNumberId: config!.phone_number_id,
-      accessToken,
+    const result = await sender!.sendText({
       to: phone,
       text: contentText!,
       contextMessageId,

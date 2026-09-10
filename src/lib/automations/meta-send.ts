@@ -131,13 +131,30 @@ async function sendViaMeta(input: SendInput): Promise<{ whatsapp_message_id: str
     throw new Error(`contact phone invalid: ${contact.phone}`)
   }
 
-  const { data: config, error: configErr } = await db
+  // Not `.single()`: an account can now have up to two whatsapp_config
+  // rows (cloud_api + qr, see migration 086) — .single() would start
+  // throwing PGRST116 for accounts that add a QR line alongside their
+  // existing WABA one. Prefer the cloud_api row when both exist.
+  const { data: configs, error: configErr } = await db
     .from('whatsapp_config')
     .select('*')
     .eq('account_id', input.accountId)
-    .single()
-  if (configErr || !config) {
+  if (configErr) {
     throw new Error('WhatsApp not configured for this account')
+  }
+  const config = configs?.find((c: { provider: string }) => c.provider === 'cloud_api') ?? configs?.[0] ?? null
+  if (!config) {
+    throw new Error('WhatsApp not configured for this account')
+  }
+  // Automations don't support the unofficial QR provider yet — Phase 1
+  // ships QR for manual inbox sends only (see provider-dispatch.ts).
+  // Without this guard, an account with only a QR line would fall
+  // through to decrypt(null) below with a cryptic crash instead of a
+  // clear explanation.
+  if (config.provider !== 'cloud_api') {
+    throw new Error(
+      'This automation cannot send: the account is connected via WhatsApp QR (unofficial mode), which does not support automations yet. Connect WhatsApp Business API (WABA) to use automations.'
+    )
   }
 
   const accessToken = decrypt(config.access_token)

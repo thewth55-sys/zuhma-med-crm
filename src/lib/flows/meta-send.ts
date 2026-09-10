@@ -1,3 +1,4 @@
+import type { SupabaseClient } from '@supabase/supabase-js'
 import {
   sendInteractiveButtons,
   sendInteractiveList,
@@ -16,6 +17,38 @@ import {
   isRecipientNotAllowedError,
 } from '@/lib/whatsapp/phone-utils'
 import { supabaseAdmin } from './admin-client'
+
+/**
+ * Resolves the account's Cloud API whatsapp_config row. Not `.single()`:
+ * an account can now have up to two rows (cloud_api + qr, see migration
+ * 086) — .single() would start throwing PGRST116 the moment an account
+ * adds a QR line alongside its existing WABA one. Throws a clear error
+ * for a QR-only account instead of falling through to decrypt(null) —
+ * Flows don't support the unofficial QR provider yet (Phase 1 ships QR
+ * for manual inbox sends only, see provider-dispatch.ts).
+ */
+async function resolveCloudApiConfig(
+  db: SupabaseClient,
+  accountId: string,
+): Promise<{ id: string; phone_number_id: string; access_token: string; provider: string }> {
+  const { data: configs, error } = await db
+    .from('whatsapp_config')
+    .select('*')
+    .eq('account_id', accountId)
+  if (error) {
+    throw new Error('WhatsApp not configured for this account')
+  }
+  const config = configs?.find((c: { provider: string }) => c.provider === 'cloud_api') ?? configs?.[0] ?? null
+  if (!config) {
+    throw new Error('WhatsApp not configured for this account')
+  }
+  if (config.provider !== 'cloud_api') {
+    throw new Error(
+      'This flow cannot send: the account is connected via WhatsApp QR (unofficial mode), which does not support Flows yet. Connect WhatsApp Business API (WABA) to use Flows.'
+    )
+  }
+  return config
+}
 
 // ------------------------------------------------------------
 // Flows-side Meta sender (interactive variants).
@@ -82,14 +115,7 @@ export async function engineSendText(
     throw new Error(`contact phone invalid: ${contact.phone}`)
   }
 
-  const { data: config, error: configErr } = await db
-    .from('whatsapp_config')
-    .select('*')
-    .eq('account_id', args.accountId)
-    .single()
-  if (configErr || !config) {
-    throw new Error('WhatsApp not configured for this account')
-  }
+  const config = await resolveCloudApiConfig(db, args.accountId)
 
   const accessToken = decrypt(config.access_token)
 
@@ -192,14 +218,7 @@ export async function engineSendMedia(
     throw new Error(`contact phone invalid: ${contact.phone}`)
   }
 
-  const { data: config, error: configErr } = await db
-    .from('whatsapp_config')
-    .select('*')
-    .eq('account_id', args.accountId)
-    .single()
-  if (configErr || !config) {
-    throw new Error('WhatsApp not configured for this account')
-  }
+  const config = await resolveCloudApiConfig(db, args.accountId)
 
   const accessToken = decrypt(config.access_token)
 
@@ -344,14 +363,7 @@ async function sendInteractiveViaMeta(
     throw new Error(`contact phone invalid: ${contact.phone}`)
   }
 
-  const { data: config, error: configErr } = await db
-    .from('whatsapp_config')
-    .select('*')
-    .eq('account_id', input.accountId)
-    .single()
-  if (configErr || !config) {
-    throw new Error('WhatsApp not configured for this account')
-  }
+  const config = await resolveCloudApiConfig(db, input.accountId)
 
   const accessToken = decrypt(config.access_token)
 

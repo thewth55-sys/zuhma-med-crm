@@ -77,9 +77,13 @@ export async function middleware(request: NextRequest) {
     return withRefreshedCookies(NextResponse.redirect(url))
   }
 
-  // API routes that need auth (not webhooks)
+  // API routes that need auth (not webhooks). No leading slash on
+  // 'webhook' — the QR gateway's inbound route is /api/whatsapp/qr-webhook,
+  // where the slash falls before "qr", not before "webhook", so
+  // `.includes('/webhook')` missed it and 401'd every inbound QR
+  // message before it ever reached that route's own secret check.
   if (!user && request.nextUrl.pathname.startsWith('/api/whatsapp/') &&
-      !request.nextUrl.pathname.includes('/webhook')) {
+      !request.nextUrl.pathname.includes('webhook')) {
     return withRefreshedCookies(
       NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     )

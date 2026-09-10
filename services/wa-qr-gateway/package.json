@@ -1,0 +1,32 @@
+{
+  "name": "wa-qr-gateway",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Standalone long-running WhatsApp Web (Baileys) gateway for Zuhma Med's unofficial QR connection method — holds the persistent socket a Next.js API route cannot. See supabase/migrations/086_whatsapp_qr_provider.sql and the Fase 1 plan for context.",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsc --watch",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@hapi/boom": "^9.1.3",
+    "@supabase/supabase-js": "^2.45.0",
+    "baileys": "7.0.0-rc14",
+    "express": "^5.2.1",
+    "pino": "^9.6.0",
+    "qrcode": "^1.5.4",
+    "sharp": "^0.35.4"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.10.0",
+    "@types/qrcode": "^1.5.5",
+    "typescript": "^5.7.0"
+  }
+}

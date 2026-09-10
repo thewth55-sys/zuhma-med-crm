@@ -41,6 +41,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ ac
       accessToken: typeof body?.accessToken === "string" ? body.accessToken.trim() : "",
       verifyToken: typeof body?.verifyToken === "string" ? body.verifyToken.trim() : null,
       pin: typeof body?.pin === "string" ? body.pin.trim() : null,
+      appSecret: typeof body?.appSecret === "string" ? body.appSecret.trim() : null,
     });
 
     if (!result.ok) {

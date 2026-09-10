@@ -16,6 +16,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { format } from "date-fns";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { ReplyQuote } from "./reply-quote";
 import { MessageReactions } from "./message-reactions";
 import { InteractivePreview } from "@/components/interactive/interactive-preview";
@@ -60,6 +61,9 @@ function MediaImage({ url, alt }: { url: string; alt: string }) {
   const [src, setSrc] = useState<string | null>(null);
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(true);
+  // No image anywhere in the inbox could be enlarged — every photo
+  // rendered only at its cropped thumbnail size, WABA or QR alike.
+  const [expanded, setExpanded] = useState(false);
 
   const loadImage = useCallback(async () => {
     if (!url) return;
@@ -110,12 +114,30 @@ function MediaImage({ url, alt }: { url: string; alt: string }) {
   }
 
   return (
-    <img
-      src={src ?? ""}
-      alt={alt}
-      className="max-h-64 max-w-60 rounded-lg object-cover"
-      onError={() => setError(true)}
-    />
+    <>
+      <button
+        type="button"
+        onClick={() => setExpanded(true)}
+        className="block cursor-zoom-in"
+        aria-label="Ver imagen en tamaño completo"
+      >
+        <img
+          src={src ?? ""}
+          alt={alt}
+          className="max-h-64 max-w-60 rounded-lg object-cover"
+          onError={() => setError(true)}
+        />
+      </button>
+      <Dialog open={expanded} onOpenChange={setExpanded}>
+        <DialogContent className="flex w-auto max-w-[95vw] items-center justify-center border-none bg-transparent p-0 shadow-none ring-0 sm:max-w-[90vw]">
+          <img
+            src={src ?? ""}
+            alt={alt}
+            className="max-h-[85vh] max-w-full rounded-lg object-contain"
+          />
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
 

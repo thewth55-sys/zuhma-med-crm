@@ -121,7 +121,7 @@ export async function POST(request: Request) {
     const { supabase, accountId, userId } = await requireRole('admin')
 
     const body = await request.json()
-    const { phone_number_id, waba_id, access_token, verify_token, pin } = body
+    const { phone_number_id, waba_id, access_token, verify_token, pin, app_secret } = body
 
     const result = await saveWhatsAppConfig({
       supabase,
@@ -132,6 +132,7 @@ export async function POST(request: Request) {
       accessToken: access_token,
       verifyToken: verify_token,
       pin,
+      appSecret: app_secret,
     })
 
     if (!result.ok) {

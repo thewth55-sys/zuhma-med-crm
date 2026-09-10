@@ -43,13 +43,20 @@ function makeSupabaseMock() {
           // its contact); otherwise fall back to the canned existing row.
           return { data: createdConversation ?? existingConversation, error: null }
         case 'whatsapp_config':
+          // send-message.ts resolves the config by querying all rows for
+          // the account (the conversation fixtures here have no
+          // whatsapp_config_id) — mirror that shape: an array, not a
+          // single row.
           return {
-            data: {
-              id: 'cfg-1',
-              account_id: 'acct-1',
-              phone_number_id: 'PNID-1',
-              access_token: 'enc-token',
-            },
+            data: [
+              {
+                id: 'cfg-1',
+                account_id: 'acct-1',
+                provider: 'cloud_api',
+                phone_number_id: 'PNID-1',
+                access_token: 'enc-token',
+              },
+            ],
             error: null,
           }
         case 'message_templates':

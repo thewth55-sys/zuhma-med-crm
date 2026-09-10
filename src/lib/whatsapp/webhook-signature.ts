@@ -18,6 +18,32 @@ import crypto from 'node:crypto'
  *   unsafe for a public template: anyone who forgets the env var would
  *   be running a fully spoofable webhook.
  */
+/**
+ * Core HMAC compare against a GIVEN secret. Used both for the global
+ * `META_APP_SECRET` (Embedded Signup accounts) and for a per-account
+ * App Secret (accounts on their own Meta app — see
+ * resolve-account-app-secret.ts).
+ */
+export function signatureMatchesSecret(
+  rawBody: string,
+  signatureHeader: string | null,
+  secret: string | null | undefined,
+): boolean {
+  if (!secret) return false
+  if (!signatureHeader) return false
+  if (!signatureHeader.startsWith('sha256=')) return false
+
+  const expected =
+    'sha256=' +
+    crypto.createHmac('sha256', secret).update(rawBody).digest('hex')
+
+  const a = Buffer.from(signatureHeader)
+  const b = Buffer.from(expected)
+  // Bail if lengths differ — timingSafeEqual throws otherwise.
+  if (a.length !== b.length) return false
+  return crypto.timingSafeEqual(a, b)
+}
+
 export function verifyMetaWebhookSignature(
   rawBody: string,
   signatureHeader: string | null,
@@ -32,16 +58,5 @@ export function verifyMetaWebhookSignature(
     return false
   }
 
-  if (!signatureHeader) return false
-  if (!signatureHeader.startsWith('sha256=')) return false
-
-  const expected =
-    'sha256=' +
-    crypto.createHmac('sha256', secret).update(rawBody).digest('hex')
-
-  const a = Buffer.from(signatureHeader)
-  const b = Buffer.from(expected)
-  // Bail if lengths differ — timingSafeEqual throws otherwise.
-  if (a.length !== b.length) return false
-  return crypto.timingSafeEqual(a, b)
+  return signatureMatchesSecret(rawBody, signatureHeader, secret)
 }

@@ -189,13 +189,23 @@ export default function InboxPage() {
         return;
       }
 
+      // Not `.maybeSingle()`: an account can now have up to two rows
+      // (cloud_api + qr, see migration 086) — .maybeSingle() would
+      // throw once a second row exists. `status` is cloud_api-specific
+      // ('connected'/'disconnected'); a qr row's connection state
+      // lives in `qr_connection_state` instead — check both so this
+      // banner isn't permanently wrong for QR-only accounts.
       const { data } = await supabase
         .from("whatsapp_config")
-        .select("status")
-        .eq("account_id", accountId)
-        .maybeSingle();
+        .select("provider, status, qr_connection_state")
+        .eq("account_id", accountId);
 
-      setWhatsappConnected(data?.status === "connected");
+      const connected = (data ?? []).some(
+        (row: { provider: string; status: string; qr_connection_state: string | null }) =>
+          (row.provider === "cloud_api" && row.status === "connected") ||
+          (row.provider === "qr" && row.qr_connection_state === "connected")
+      );
+      setWhatsappConnected(connected);
     };
 
     checkConnection();

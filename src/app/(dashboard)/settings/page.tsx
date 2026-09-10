@@ -11,8 +11,7 @@ import { SettingsOverview } from '@/components/settings/settings-overview';
 import { ProfileForm } from '@/components/settings/profile-form';
 import { SecurityPanel } from '@/components/settings/security-panel';
 import { AppearancePanel } from '@/components/settings/appearance-panel';
-import { WhatsAppConfig } from '@/components/settings/whatsapp-config';
-import { WhatsAppEmbeddedSignupButton } from '@/components/settings/whatsapp-embedded-signup-button';
+import { WhatsAppProviderPicker } from '@/components/settings/whatsapp-provider-picker';
 import { TemplateManager } from '@/components/settings/template-manager';
 import { QuickRepliesManager } from '@/components/settings/quick-replies-manager';
 import { FieldsAndTagsPanel } from '@/components/settings/fields-and-tags-panel';
@@ -62,12 +61,7 @@ export default function SettingsPage() {
     profile: <ProfileForm />,
     security: <SecurityPanel />,
     appearance: <AppearancePanel />,
-    whatsapp: (
-      <div className="space-y-4">
-        <WhatsAppEmbeddedSignupButton />
-        <WhatsAppConfig />
-      </div>
-    ),
+    whatsapp: <WhatsAppProviderPicker />,
     templates: <TemplateManager />,
     'quick-replies': <QuickRepliesManager />,
     fields: <FieldsAndTagsPanel />,

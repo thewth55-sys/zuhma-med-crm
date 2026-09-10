@@ -111,15 +111,33 @@ export async function createBroadcast(
 
   // Config (fail fast + provides the audit trail owner already resolved
   // by the caller). Meta send needs phone_number_id + decrypted token.
-  const { data: config, error: configError } = await db
+  //
+  // Not `.single()`: an account can now have up to two whatsapp_config
+  // rows (cloud_api + qr, see migration 086) — .single() would start
+  // throwing PGRST116 for accounts that add a QR line alongside their
+  // existing WABA one. Prefer the cloud_api row when both exist.
+  const { data: configs, error: configError } = await db
     .from('whatsapp_config')
     .select('*')
-    .eq('account_id', accountId)
-    .single();
+    .eq('account_id', accountId);
+  const config = configError
+    ? null
+    : (configs?.find((c: { provider: string }) => c.provider === 'cloud_api') ?? configs?.[0] ?? null);
   if (configError || !config) {
     throw new BroadcastError(
       'whatsapp_not_configured',
       'WhatsApp not configured. Please set up your WhatsApp integration first.',
+      400
+    );
+  }
+  // Broadcasts don't support the unofficial QR provider yet — Phase 1
+  // ships QR for manual inbox sends only (see provider-dispatch.ts).
+  // Without this guard, a QR-only account would fall through to
+  // decrypt(null) below with a cryptic crash instead of a clear reason.
+  if (config.provider !== 'cloud_api') {
+    throw new BroadcastError(
+      'qr_not_supported',
+      'Broadcasts are not available for accounts connected via WhatsApp QR (unofficial mode) yet. Connect WhatsApp Business API (WABA) to send broadcasts.',
       400
     );
   }

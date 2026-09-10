@@ -70,6 +70,7 @@ export function WhatsAppConfig() {
   const [wabaId, setWabaId] = useState('');
   const [accessToken, setAccessToken] = useState('');
   const [verifyToken, setVerifyToken] = useState('');
+  const [appSecret, setAppSecret] = useState('');
   const [pin, setPin] = useState('');
   const [tokenEdited, setTokenEdited] = useState(false);
 
@@ -258,6 +259,10 @@ export function WhatsAppConfig() {
         phone_number_id: phoneNumberId.trim(),
         waba_id: wabaId.trim() || null,
         verify_token: verifyToken.trim() || null,
+        // Solo para cuentas con su PROPIO app de Meta (WABA propia). Blank
+        // conserva el actual. El server lo cifra y lo usa para verificar la
+        // firma de los webhooks entrantes de ese app.
+        app_secret: appSecret.trim() || null,
         // Optional — only sent when the user filled it in. The server
         // requires it on first save or when changing numbers; for a
         // simple token rotation, leaving it blank skips re-register.
@@ -699,6 +704,27 @@ export function WhatsAppConfig() {
               />
               <p className="text-xs text-muted-foreground">
                 {t('webhookVerifyTokenHint')}
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-muted-foreground">
+                App Secret
+                <span className="ml-1 text-muted-foreground">(solo app propio)</span>
+              </Label>
+              <Input
+                type="password"
+                placeholder="App Secret de tu app de Meta"
+                value={appSecret}
+                onChange={(e) => setAppSecret(e.target.value)}
+                className="bg-muted border-border text-foreground placeholder:text-muted-foreground"
+              />
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Solo si conectas tu PROPIO app de Meta (WABA propia). Es el{' '}
+                <strong>App Secret</strong> (Meta → Configuración → Información básica →
+                &quot;Clave secreta del app&quot;), necesario para verificar la firma de los
+                mensajes entrantes de ese app. Déjalo en blanco si te conectaste por el flujo
+                estándar de la plataforma, o para conservar el actual.
               </p>
             </div>
 

@@ -29,6 +29,10 @@ export interface SaveWhatsAppConfigParams {
   accessToken: string;
   verifyToken?: string | null;
   pin?: string | null;
+  /** Meta App Secret for accounts on their OWN Meta app (BYO WABA).
+   *  Blank/omitted leaves any existing value untouched (never wiped on
+   *  a plain token rotation). Stored encrypted. */
+  appSecret?: string | null;
 }
 
 export interface SaveWhatsAppConfigResult {
@@ -42,7 +46,7 @@ export interface SaveWhatsAppConfigResult {
 }
 
 export async function saveWhatsAppConfig(params: SaveWhatsAppConfigParams): Promise<SaveWhatsAppConfigResult> {
-  const { supabase, accountId, savedByUserId, phoneNumberId, wabaId, accessToken, verifyToken, pin } = params;
+  const { supabase, accountId, savedByUserId, phoneNumberId, wabaId, accessToken, verifyToken, pin, appSecret } = params;
 
   if (!accessToken || !phoneNumberId) {
     return { ok: false, error: "access_token and phone_number_id are required", errorStatus: 400 };
@@ -83,9 +87,13 @@ export async function saveWhatsAppConfig(params: SaveWhatsAppConfigParams): Prom
 
   let encryptedAccessToken: string;
   let encryptedVerifyToken: string | null;
+  // Only patched when a value is supplied — a blank field on an update
+  // must NOT wipe an existing app secret (the UI masks it, like the token).
+  let appSecretPatch: { app_secret?: string } = {};
   try {
     encryptedAccessToken = encrypt(accessToken);
     encryptedVerifyToken = verifyToken ? encrypt(verifyToken) : null;
+    appSecretPatch = appSecret && appSecret.trim() ? { app_secret: encrypt(appSecret.trim()) } : {};
   } catch {
     return {
       ok: false,
@@ -145,7 +153,10 @@ export async function saveWhatsAppConfig(params: SaveWhatsAppConfigParams): Prom
   };
 
   if (existing) {
-    const { error: updateError } = await supabase.from("whatsapp_config").update(baseRow).eq("account_id", accountId);
+    const { error: updateError } = await supabase
+      .from("whatsapp_config")
+      .update({ ...baseRow, ...appSecretPatch })
+      .eq("account_id", accountId);
     if (updateError) {
       console.error("[saveWhatsAppConfig] update error:", updateError);
       return { ok: false, error: "Failed to update configuration", errorStatus: 500 };
@@ -153,7 +164,7 @@ export async function saveWhatsAppConfig(params: SaveWhatsAppConfigParams): Prom
   } else {
     const { error: insertError } = await supabase
       .from("whatsapp_config")
-      .insert({ account_id: accountId, user_id: savedByUserId, ...baseRow });
+      .insert({ account_id: accountId, user_id: savedByUserId, ...baseRow, ...appSecretPatch });
     if (insertError) {
       console.error("[saveWhatsAppConfig] insert error:", insertError);
       return { ok: false, error: "Failed to save configuration", errorStatus: 500 };
