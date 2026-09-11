@@ -196,33 +196,6 @@ export async function POST(request: Request) {
   const rawBody = await request.text()
   const signature = request.headers.get('x-hub-signature-256')
 
-  // Entry log — fires on EVERY inbound POST, before any verification, so
-  // "Meta isn't delivering" can be told apart from "delivered but rejected".
-  // No secrets: only routing ids + whether the signature header is present.
-  {
-    let entryPnid: string | undefined
-    let entryField: string | undefined
-    let entryKind: string | undefined
-    try {
-      const p = JSON.parse(rawBody)
-      const change = p?.entry?.[0]?.changes?.[0]
-      entryPnid = change?.value?.metadata?.phone_number_id
-      entryField = change?.field
-      entryKind = change?.value?.messages
-        ? 'message'
-        : change?.value?.statuses
-          ? 'status'
-          : 'other'
-    } catch {}
-    console.log('[webhook] POST received', {
-      hasSignatureHeader: !!signature,
-      bodyBytes: rawBody.length,
-      field: entryField ?? null,
-      kind: entryKind ?? null,
-      phoneNumberId: entryPnid ?? null,
-    })
-  }
-
   // Verify against the global platform secret first (Embedded Signup —
   // the majority). If that fails, this may be an account that brought
   // its OWN Meta app: resolve its per-account app secret from the
