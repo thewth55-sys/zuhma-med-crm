@@ -13,9 +13,12 @@ import { createClient } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin-client";
 import { UnauthorizedError, ForbiddenError } from "./account";
 
+export type StaffRole = "global" | "support" | "dev" | "qa" | "customer_success" | "marketing";
+
 export interface PlatformAdminContext {
   userId: string;
   email: string | null;
+  role: StaffRole;
 }
 
 /**
@@ -37,7 +40,7 @@ export async function requirePlatformAdmin(): Promise<PlatformAdminContext> {
 
   const { data, error } = await supabase
     .from("platform_admins")
-    .select("user_id")
+    .select("user_id, role")
     .eq("user_id", user.id)
     .maybeSingle();
 
@@ -49,7 +52,21 @@ export async function requirePlatformAdmin(): Promise<PlatformAdminContext> {
     throw new ForbiddenError("Platform admin access required");
   }
 
-  return { userId: user.id, email: user.email ?? null };
+  return { userId: user.id, email: user.email ?? null, role: data.role as StaffRole };
+}
+
+/**
+ * Narrower gate on top of `requirePlatformAdmin()` — 'global' always
+ * passes (the super-admin role, preserved for today's staff by
+ * migration 092's default), everyone else needs their `role` to be
+ * in `allowed`. Only 'marketing' has a real caller today.
+ */
+export async function requireStaffRole(allowed: StaffRole[]): Promise<PlatformAdminContext> {
+  const ctx = await requirePlatformAdmin();
+  if (ctx.role !== "global" && !allowed.includes(ctx.role)) {
+    throw new ForbiddenError(`This action requires one of these staff roles: ${allowed.join(", ")}`);
+  }
+  return ctx;
 }
 
 export interface AccountOwnerInfo {

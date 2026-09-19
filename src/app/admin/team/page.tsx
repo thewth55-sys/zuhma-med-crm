@@ -1,10 +1,5 @@
 "use client";
 
-// ============================================================
-// /admin/team — manage who has platform-admin access (Zuhma Med CRM
-// internal staff, not clinic accounts). Backed by /api/platform-admin/team.
-// ============================================================
-
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { AlertTriangle, Loader2, Plus, ShieldOff, UserCog } from "lucide-react";
@@ -12,6 +7,14 @@ import { AlertTriangle, Loader2, Plus, ShieldOff, UserCog } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
 import {
   Table,
   TableBody,
@@ -35,6 +38,7 @@ interface TeamMember {
   fullName: string | null;
   createdAt: string;
   invitedBy: string | null;
+  role: "global" | "support" | "dev" | "qa" | "customer_success" | "marketing";
 }
 
 async function postJson(url: string, body?: unknown) {
@@ -54,7 +58,9 @@ export default function AdminTeamPage() {
 
   const [addOpen, setAddOpen] = useState(false);
   const [email, setEmail] = useState("");
+  const [selectedRole, setSelectedRole] = useState<"global" | "support" | "dev" | "qa" | "customer_success" | "marketing">("global");
   const [saving, setSaving] = useState(false);
+  const [busyUserId, setBusyUserId] = useState<string | null>(null);
 
   const [revokeTarget, setRevokeTarget] = useState<TeamMember | null>(null);
   const [revoking, setRevoking] = useState(false);
@@ -78,10 +84,11 @@ export default function AdminTeamPage() {
     if (!email.trim()) return;
     setSaving(true);
     try {
-      await postJson("/api/platform-admin/team", { email: email.trim() });
+      await postJson("/api/platform-admin/team", { email: email.trim(), role: selectedRole });
       toast.success("Acceso de administrador otorgado");
       setAddOpen(false);
       setEmail("");
+      setSelectedRole("global");
       void loadMembers();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "No se pudo agregar");
@@ -104,6 +111,30 @@ export default function AdminTeamPage() {
       toast.error(err instanceof Error ? err.message : "No se pudo quitar el acceso");
     } finally {
       setRevoking(false);
+    }
+  }
+
+  async function handleRoleChange(userId: string, newRole: "global" | "support" | "dev" | "qa" | "customer_success" | "marketing") {
+    setBusyUserId(userId);
+    try {
+      const res = await fetch(`/api/platform-admin/team/${userId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ role: newRole }),
+      });
+      const body = await res.json().catch(() => null);
+      if (!res.ok) {
+        toast.error(body?.error ?? "No se pudo actualizar el rol");
+        return;
+      }
+      setMembers((prev) => prev?.map((member) => (member.userId === userId ? { ...member, role: newRole } : member)) ?? null);
+      toast.success("Rol actualizado");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "No se pudo actualizar el rol");
+    } finally {
+      setBusyUserId(null);
     }
   }
 
@@ -140,6 +171,7 @@ export default function AdminTeamPage() {
               <TableRow>
                 <TableHead>Nombre</TableHead>
                 <TableHead>Correo</TableHead>
+                <TableHead>Rol</TableHead>
                 <TableHead>Admin desde</TableHead>
                 <TableHead className="text-right">Acción</TableHead>
               </TableRow>
@@ -152,6 +184,22 @@ export default function AdminTeamPage() {
                     {member.fullName ?? "—"}
                   </TableCell>
                   <TableCell>{member.email ?? "—"}</TableCell>
+                  <TableCell className="flex items-center">
+                    <Select value={member.role} onValueChange={(newRole) => handleRoleChange(member.userId, newRole as "global" | "support" | "dev" | "qa" | "customer_success" | "marketing")} disabled={busyUserId === member.userId}>
+                      <SelectTrigger disabled={busyUserId === member.userId}>
+                        <SelectValue placeholder="Selecciona un rol" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="global">Admin global</SelectItem>
+                        <SelectItem value="support">Soporte</SelectItem>
+                        <SelectItem value="dev">Dev</SelectItem>
+                        <SelectItem value="qa">QA</SelectItem>
+                        <SelectItem value="customer_success">Customer Success</SelectItem>
+                        <SelectItem value="marketing">Marketing</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    {busyUserId === member.userId && <Loader2 className="size-4 animate-spin ml-2" />}
+                  </TableCell>
                   <TableCell className="text-muted-foreground">
                     {new Date(member.createdAt).toLocaleDateString()}
                   </TableCell>
@@ -189,10 +237,24 @@ export default function AdminTeamPage() {
             <Input
               id="team-email"
               type="email"
-              placeholder="nombre@zuhma.com"
+              placeholder="nombre@zentrolabs.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
+            <Label htmlFor="team-role">Rol</Label>
+            <Select value={selectedRole} onValueChange={(v) => v && setSelectedRole(v)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Selecciona un rol" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="global">Admin global</SelectItem>
+                <SelectItem value="support">Soporte</SelectItem>
+                <SelectItem value="dev">Dev</SelectItem>
+                <SelectItem value="qa">QA</SelectItem>
+                <SelectItem value="customer_success">Customer Success</SelectItem>
+                <SelectItem value="marketing">Marketing</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setAddOpen(false)}>

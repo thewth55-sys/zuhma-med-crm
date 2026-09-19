@@ -13,7 +13,7 @@
 
 import { NextResponse } from "next/server";
 
-import { requirePlatformAdmin, logPlatformAdminAction } from "@/lib/auth/platform-admin";
+import { requirePlatformAdmin, requireStaffRole, logPlatformAdminAction, type StaffRole } from "@/lib/auth/platform-admin";
 import { toErrorResponse } from "@/lib/auth/account";
 import { supabaseAdmin } from "@/lib/supabase/admin-client";
 import { checkRateLimit, rateLimitResponse, RATE_LIMITS } from "@/lib/rate-limit";
@@ -25,7 +25,7 @@ export async function GET() {
 
     const { data: rows, error } = await admin
       .from("platform_admins")
-      .select("user_id, created_at, invited_by")
+      .select("user_id, created_at, invited_by, role")
       .order("created_at", { ascending: true });
 
     if (error) {
@@ -42,6 +42,7 @@ export async function GET() {
           fullName: (data?.user?.user_metadata?.full_name as string | undefined) ?? null,
           createdAt: row.created_at,
           invitedBy: row.invited_by,
+          role: row.role as StaffRole,
         };
       }),
     );
@@ -52,9 +53,14 @@ export async function GET() {
   }
 }
 
+const STAFF_ROLES: StaffRole[] = ["global", "support", "dev", "qa", "customer_success", "marketing"];
+
 export async function POST(request: Request) {
   try {
-    const admin = await requirePlatformAdmin();
+    // Inviting staff (and choosing their role) is itself a privileged
+    // action — only 'global' admins do this, same bar as reassigning
+    // an existing member's role in [userId]/route.ts.
+    const admin = await requireStaffRole(["global"]);
 
     const limit = checkRateLimit(`platformAdmin:team:invite:${admin.userId}`, RATE_LIMITS.adminAction);
     if (!limit.success) return rateLimitResponse(limit);
@@ -64,6 +70,10 @@ export async function POST(request: Request) {
     if (!email || !email.includes("@")) {
       return NextResponse.json({ error: "Correo inválido" }, { status: 400 });
     }
+    const role: StaffRole =
+      typeof body?.role === "string" && STAFF_ROLES.includes(body.role as StaffRole)
+        ? (body.role as StaffRole)
+        : "global";
 
     const db = supabaseAdmin();
 
@@ -98,7 +108,7 @@ export async function POST(request: Request) {
 
     const { error: insertErr } = await db
       .from("platform_admins")
-      .upsert({ user_id: userId, invited_by: admin.userId }, { onConflict: "user_id" });
+      .upsert({ user_id: userId, invited_by: admin.userId, role }, { onConflict: "user_id" });
 
     if (insertErr) {
       console.error("[POST /api/platform-admin/team] insert error:", insertErr);

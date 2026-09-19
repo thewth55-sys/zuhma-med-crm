@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Menu } from "lucide-react";
 
 import { AdminSidebar } from "@/components/admin/admin-sidebar";
+import type { StaffRole } from "@/lib/auth/platform-admin";
 
 /**
  * Client wrapper around AdminSidebar + a mobile-only top bar with a
@@ -11,12 +12,12 @@ import { AdminSidebar } from "@/components/admin/admin-sidebar";
  * requirePlatformAdmin() gate), same split as dashboard-shell.tsx vs.
  * the dashboard's own layout.tsx.
  */
-export function AdminShell({ children }: { children: React.ReactNode }) {
+export function AdminShell({ children, staffRole }: { children: React.ReactNode; staffRole: StaffRole }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
     <div className="flex min-h-screen bg-background text-foreground">
-      <AdminSidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      <AdminSidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} staffRole={staffRole} />
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="flex h-14 shrink-0 items-center gap-2 border-b border-border px-4 lg:hidden">
           <button

@@ -114,7 +114,13 @@
     "menuProfile": "Perfil",
     "menuMyAvailability": "Mi disponibilidad",
     "menuSettings": "Ajustes",
-    "menuSignOut": "Cerrar sesión"
+    "menuSignOut": "Cerrar sesión",
+    "comingSoon": "Próximamente",
+    "marketingSummary": "Resumen",
+    "marketingCampaigns": "Campañas",
+    "marketingSocial": "Redes sociales",
+    "marketingContent": "Contenido",
+    "marketingRequests": "Solicitudes"
   },
   "Header": {
     "dashboard": "Panel",
@@ -2471,5 +2477,96 @@
     "subtitle": "Descarga la app para una mejor experiencia",
     "download": "Descargar",
     "dismiss": "Cerrar"
+  },
+  "Marketing": {
+    "summary": {
+      "title": "Resumen de marketing",
+      "description": "Rendimiento de tus canales de marketing en un solo lugar.",
+      "comingSoon": "Estamos construyendo un resumen con el desempeño de tus campañas, redes y contenido."
+    },
+    "campaigns": {
+      "title": "Campañas",
+      "description": "Campañas de marketing multicanal, más allá de las difusiones de WhatsApp.",
+      "comingSoon": "Podrás crear y dar seguimiento a campañas de marketing directamente desde aquí."
+    },
+    "social": {
+      "title": "Redes sociales",
+      "description": "Publica y programa contenido para tus redes sociales.",
+      "comingSoon": "Vas a poder programar publicaciones para tus redes sociales desde Zuhma Med."
+    },
+    "requests": {
+      "title": "Solicitudes",
+      "description": "Solicitudes de marketing de tu equipo.",
+      "comingSoon": "Tu equipo podrá pedir piezas de marketing y darles seguimiento desde aquí."
+    },
+    "content": {
+      "title": "Contenido",
+      "description": "Sube piezas de contenido (Reel / Carrusel / Historia) para que la clínica las apruebe.",
+      "empty": {
+        "pending": "No hay piezas por aprobar.",
+        "approved": "No hay piezas aprobadas todavía.",
+        "rejected": "No hay piezas con cambios pedidos.",
+        "published": "Todavía no se ha publicado ninguna pieza."
+      },
+      "viewOnDrive": "Ver en Google Drive",
+      "scheduledFor": "Programado para {date}",
+      "statusValues": {
+        "pending": "Pendiente",
+        "approved": "Aprobado",
+        "rejected": "Rechazado",
+        "published": "Publicada"
+      },
+      "contentTypeValues": {
+        "reel": "Reel",
+        "carrusel": "Carrusel",
+        "historia": "Historia"
+      },
+      "banner": {
+        "title": "{count, plural, one {# pieza espera} other {# piezas esperan}} tu visto bueno",
+        "cta": "Revisar la primera"
+      },
+      "tabs": {
+        "pending": "Por aprobar",
+        "approved": "Aprobadas",
+        "rejected": "Con cambios",
+        "published": "Publicadas"
+      },
+      "actions": {
+        "approve": "Aprobar",
+        "reject": "Rechazar",
+        "feedback": "Dar observaciones",
+        "cancel": "Cancelar",
+        "submit": "Enviar",
+        "success": "Actualizado correctamente",
+        "error": "No se pudo actualizar",
+        "loadError": "No se pudo cargar el contenido",
+        "review": "Revisar",
+        "view": "Ver",
+        "viewNote": "Ver mi nota"
+      },
+      "dialogs": {
+        "rejectTitle": "Rechazar pieza",
+        "rejectDescription": "Explica brevemente por qué se rechaza, para que el equipo pueda ajustarla.",
+        "feedbackTitle": "Dar observaciones",
+        "feedbackDescription": "Deja un comentario para el equipo sin rechazar la pieza."
+      },
+      "errors": {
+        "reasonRequired": "El motivo de rechazo es requerido",
+        "commentRequired": "El comentario es requerido"
+      },
+      "detail": {
+        "back": "Volver a contenido",
+        "notFound": "No se encontró esta pieza.",
+        "previewAccount": "Tu clínica",
+        "complianceTitle": "Revisión de cumplimiento",
+        "complianceNote": "Revisado por el equipo antes de llegarte.",
+        "decisionTitle": "Tu decisión",
+        "scheduledNotice": "Al aprobar se programa para el {date}.",
+        "commentsTitle": "Comentarios",
+        "noComments": "Sin comentarios todavía.",
+        "commentPlaceholder": "Escribe un comentario…",
+        "rejectPlaceholder": "Explica qué te gustaría cambiar…"
+      }
+    }
   }
 }

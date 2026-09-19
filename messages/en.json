@@ -114,7 +114,13 @@
     "menuProfile": "Profile",
     "menuMyAvailability": "My availability",
     "menuSettings": "Settings",
-    "menuSignOut": "Sign out"
+    "menuSignOut": "Sign out",
+    "comingSoon": "Coming soon",
+    "marketingSummary": "Summary",
+    "marketingCampaigns": "Campaigns",
+    "marketingSocial": "Social",
+    "marketingContent": "Content",
+    "marketingRequests": "Requests"
   },
   "Header": {
     "dashboard": "Dashboard",
@@ -2471,5 +2477,96 @@
     "subtitle": "Download the app for a better experience",
     "download": "Download",
     "dismiss": "Close"
+  },
+  "Marketing": {
+    "summary": {
+      "title": "Marketing summary",
+      "description": "Your marketing channels' performance in one place.",
+      "comingSoon": "We're building a summary of your campaigns, social, and content performance."
+    },
+    "campaigns": {
+      "title": "Campaigns",
+      "description": "Multi-channel marketing campaigns, beyond WhatsApp broadcasts.",
+      "comingSoon": "You'll be able to create and track marketing campaigns right from here."
+    },
+    "social": {
+      "title": "Social",
+      "description": "Publish and schedule content for your social channels.",
+      "comingSoon": "You'll be able to schedule social posts from Zuhma Med."
+    },
+    "requests": {
+      "title": "Requests",
+      "description": "Marketing requests from your team.",
+      "comingSoon": "Your team will be able to request marketing pieces and track them here."
+    },
+    "content": {
+      "title": "Content",
+      "description": "Upload content pieces (Reel / Carousel / Story) for the clinic to approve.",
+      "empty": {
+        "pending": "No pieces waiting for approval.",
+        "approved": "No approved pieces yet.",
+        "rejected": "No pieces with requested changes.",
+        "published": "No piece has been published yet."
+      },
+      "viewOnDrive": "View on Google Drive",
+      "scheduledFor": "Scheduled for {date}",
+      "statusValues": {
+        "pending": "Pending",
+        "approved": "Approved",
+        "rejected": "Rejected",
+        "published": "Published"
+      },
+      "contentTypeValues": {
+        "reel": "Reel",
+        "carrusel": "Carousel",
+        "historia": "Story"
+      },
+      "banner": {
+        "title": "{count, plural, one {# piece is} other {# pieces are}} waiting for your approval",
+        "cta": "Review the first one"
+      },
+      "tabs": {
+        "pending": "Pending",
+        "approved": "Approved",
+        "rejected": "Needs changes",
+        "published": "Published"
+      },
+      "actions": {
+        "approve": "Approve",
+        "reject": "Reject",
+        "feedback": "Leave feedback",
+        "cancel": "Cancel",
+        "submit": "Submit",
+        "success": "Updated successfully",
+        "error": "Couldn't update",
+        "loadError": "Couldn't load content",
+        "review": "Review",
+        "view": "View",
+        "viewNote": "View my note"
+      },
+      "dialogs": {
+        "rejectTitle": "Reject piece",
+        "rejectDescription": "Briefly explain why, so the team can adjust it.",
+        "feedbackTitle": "Leave feedback",
+        "feedbackDescription": "Leave a comment for the team without rejecting the piece."
+      },
+      "errors": {
+        "reasonRequired": "A rejection reason is required",
+        "commentRequired": "A comment is required"
+      },
+      "detail": {
+        "back": "Back to content",
+        "notFound": "This piece couldn't be found.",
+        "previewAccount": "Your clinic",
+        "complianceTitle": "Compliance review",
+        "complianceNote": "Reviewed by the team before reaching you.",
+        "decisionTitle": "Your decision",
+        "scheduledNotice": "Approving schedules it for {date}.",
+        "commentsTitle": "Comments",
+        "noComments": "No comments yet.",
+        "commentPlaceholder": "Write a comment…",
+        "rejectPlaceholder": "Explain what you'd like changed…"
+      }
+    }
   }
 }

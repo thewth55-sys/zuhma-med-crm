@@ -21,6 +21,11 @@ import {
   Users,
   Workflow,
   Zap,
+  BarChart3,
+  Megaphone,
+  AtSign,
+  Newspaper,
+  Inbox,
   type LucideIcon,
 } from "lucide-react";
 
@@ -33,6 +38,14 @@ export interface NavItem {
    * Purely informational — doesn't affect routing or access.
    */
   beta?: boolean;
+  /**
+   * Marks a destination that isn't built yet — the sidebar renders a
+   * lock icon and the link still navigates, but to a page that just
+   * says "Próximamente". This repo has no plan/feature gating (every
+   * account has full, equal access per CLAUDE.md) — `comingSoon` is
+   * purely "not built yet", unrelated to any billing concept.
+   */
+  comingSoon?: boolean;
 }
 
 export const navItems: NavItem[] = [
@@ -47,6 +60,16 @@ export const navItems: NavItem[] = [
   { href: "/automations", labelKey: "automations", icon: Zap },
   { href: "/flows", labelKey: "flows", icon: Workflow, beta: true },
   { href: "/agents", labelKey: "aiAgents", icon: Bot },
+
+  // MARKETING — portado de zentro-med: 4 de los 5 destinos son
+  // "Próximamente" (ver ComingSoonState), `/marketing/content` ya es
+  // funcional (aprobación de contenido). Sin `group` — este repo no
+  // tiene secciones de nav, son ítems planos como el resto.
+  { href: "/marketing/summary", labelKey: "marketingSummary", icon: BarChart3, comingSoon: true },
+  { href: "/marketing/campaigns", labelKey: "marketingCampaigns", icon: Megaphone, comingSoon: true },
+  { href: "/marketing/social", labelKey: "marketingSocial", icon: AtSign, comingSoon: true },
+  { href: "/marketing/content", labelKey: "marketingContent", icon: Newspaper },
+  { href: "/marketing/requests", labelKey: "marketingRequests", icon: Inbox, comingSoon: true },
 ];
 
 /**

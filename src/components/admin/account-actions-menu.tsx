@@ -10,6 +10,7 @@
 // ============================================================
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import {
   Ban,
@@ -20,6 +21,7 @@ import {
   Lock,
   LogIn,
   Mail,
+  Megaphone,
   MoreHorizontal,
   RotateCcw,
   Trash2,
@@ -72,6 +74,7 @@ export function AccountActionsMenu({
   subscriptionStatus,
   onChanged,
 }: AccountActionsMenuProps) {
+  const router = useRouter();
   const [busyAction, setBusyAction] = useState<string | null>(null);
   const isDemo = !!ownerEmail && ownerEmail.toLowerCase().endsWith(DEMO_EMAIL_DOMAIN);
 
@@ -244,6 +247,10 @@ export function AccountActionsMenu({
           >
             <Lock className="size-4" />
             Establecer contraseña temporal
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => router.push(`/admin/accounts/${accountId}/marketing-content`)}>
+            <Megaphone className="size-4" />
+            Contenido de Marketing
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem

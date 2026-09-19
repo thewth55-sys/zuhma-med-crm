@@ -10,13 +10,14 @@ import { AdminShell } from "@/components/admin/admin-shell";
 // session that just isn't platform staff sends them back to their
 // own dashboard rather than a bare 403 page.
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
+  let role: Awaited<ReturnType<typeof requirePlatformAdmin>>["role"];
   try {
-    await requirePlatformAdmin();
+    ({ role } = await requirePlatformAdmin());
   } catch (err) {
     if (err instanceof UnauthorizedError) redirect("/login");
     if (err instanceof ForbiddenError) redirect("/dashboard");
     throw err;
   }
 
-  return <AdminShell>{children}</AdminShell>;
+  return <AdminShell staffRole={role}>{children}</AdminShell>;
 }

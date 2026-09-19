@@ -3,13 +3,15 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect } from "react";
-import { LayoutDashboard, History, ShieldCheck, Users, UserCog, Smartphone, Megaphone, X } from "lucide-react";
+import { LayoutDashboard, History, ShieldCheck, Users, UserCog, Smartphone, Megaphone, Newspaper, X } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import type { StaffRole } from "@/lib/auth/platform-admin";
 
-const NAV_ITEMS = [
+const NAV_ITEMS: { href: string; label: string; icon: typeof LayoutDashboard; exact: boolean; roles?: StaffRole[] }[] = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
   { href: "/admin/accounts", label: "Cuentas", icon: Users, exact: false },
+  { href: "/admin/marketing", label: "Marketing", icon: Newspaper, exact: false, roles: ["marketing"] },
   { href: "/admin/audit-log", label: "Log de auditoría", icon: History, exact: true },
   { href: "/admin/team", label: "Equipo interno", icon: UserCog, exact: true },
   { href: "/admin/simulador", label: "Simulador demo", icon: Smartphone, exact: true },
@@ -20,10 +22,15 @@ interface AdminSidebarProps {
   /** Controlled on mobile by AdminShell's hamburger button. Ignored on lg+. */
   open?: boolean;
   onClose?: () => void;
+  /** 'global' sees every item; other roles only see items with no `roles` restriction, or ones that list their role. */
+  staffRole: StaffRole;
 }
 
-export function AdminSidebar({ open = false, onClose }: AdminSidebarProps) {
+export function AdminSidebar({ open = false, onClose, staffRole }: AdminSidebarProps) {
   const pathname = usePathname();
+  const visibleItems = NAV_ITEMS.filter(
+    (item) => !item.roles || staffRole === "global" || item.roles.includes(staffRole),
+  );
 
   // Close the drawer on navigation — same UX as the main dashboard sidebar.
   useEffect(() => {
@@ -70,7 +77,7 @@ export function AdminSidebar({ open = false, onClose }: AdminSidebarProps) {
         </div>
 
         <nav className="flex flex-1 flex-col gap-1 px-2 py-3">
-          {NAV_ITEMS.map((item) => {
+          {visibleItems.map((item) => {
             const active = item.exact ? pathname === item.href : pathname.startsWith(item.href);
             return (
               <Link

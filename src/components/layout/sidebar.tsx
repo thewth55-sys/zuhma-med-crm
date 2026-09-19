@@ -12,6 +12,7 @@ import {
   CalendarClock,
   Crown,
   LifeBuoy,
+  Lock,
   LogOut,
   Settings,
   Shield,
@@ -221,6 +222,9 @@ export function Sidebar({ open = false, onClose }: SidebarProps) {
                   >
                     <item.icon className="h-4 w-4" />
                     <span className="flex-1">{t(item.labelKey as string)}</span>
+                    {item.comingSoon && (
+                      <Lock className="h-3.5 w-3.5 text-muted-foreground/60" aria-label={t("comingSoon")} />
+                    )}
                     {item.beta && (
                       <span
                         aria-label={t("beta")}
