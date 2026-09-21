@@ -210,6 +210,10 @@ export function MarketingContentDetail({ pieceId }: MarketingContentDetailProps)
   }
 
   const embedUrl = driveEmbedUrl(piece.drive_url);
+  // Reel/Historia are vertical (Instagram 9:16); Carrusel is closer to
+  // a square feed post — aspect-video (16:9) fit neither and left
+  // vertical clips squashed inside a landscape frame.
+  const embedAspectClass = piece.content_type === "carrusel" ? "aspect-square" : "aspect-[9/16]";
 
   return (
     <div className="space-y-4">
@@ -228,7 +232,7 @@ export function MarketingContentDetail({ pieceId }: MarketingContentDetailProps)
                 {embedUrl && (
                   <iframe
                     src={embedUrl}
-                    className="aspect-video w-full rounded-lg border border-border"
+                    className={`${embedAspectClass} w-full rounded-lg border border-border`}
                     allow="autoplay"
                   />
                 )}
