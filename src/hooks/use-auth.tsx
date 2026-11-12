@@ -89,6 +89,13 @@ interface AuthContextValue {
    */
   profileLoading: boolean;
   signOut: () => Promise<void>;
+  /**
+   * Same cleanup as `signOut` (trusted-device cookie, native session,
+   * Supabase session, in-memory user) without navigating to /login.
+   * The Zentro migration notice uses this so it can replace the UI
+   * itself instead of bouncing through the login form.
+   */
+  signOutWithoutRedirect: () => Promise<void>;
   /** Re-fetch the current user's profile row — call after a save from
    *  the settings form so header/sidebar reflect the change without a
    *  full page reload. */
@@ -368,7 +375,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, [fetchProfile]);
 
-  const signOut = useCallback(async () => {
+  const signOutWithoutRedirect = useCallback(async () => {
     const supabase = createClient();
     // Limpia la cookie de "dispositivo de confianza" (httpOnly) ANTES de
     // revocar la sesión, para que la próxima vez se pida el código 2FA.
@@ -382,8 +389,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
     setProfile(null);
     setAccount(null);
-    window.location.href = "/login";
   }, []);
+
+  const signOut = useCallback(async () => {
+    await signOutWithoutRedirect();
+    window.location.href = "/login";
+  }, [signOutWithoutRedirect]);
 
   const refreshProfile = useCallback(async () => {
     if (!user?.id) return;
@@ -417,6 +428,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         loading,
         profileLoading,
         signOut,
+        signOutWithoutRedirect,
         refreshProfile,
         account,
         defaultCurrency: account?.default_currency ?? DEFAULT_CURRENCY,
@@ -447,6 +459,7 @@ export function useAuth(): AuthContextValue {
       signOut: async () => {
         window.location.href = "/login";
       },
+      signOutWithoutRedirect: async () => {},
       refreshProfile: async () => {},
       account: null,
       defaultCurrency: DEFAULT_CURRENCY,

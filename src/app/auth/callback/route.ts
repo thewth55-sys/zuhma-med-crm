@@ -15,6 +15,7 @@ import { NextResponse } from "next/server";
 
 import { createClient } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin-client";
+import { migrationInfoForUser } from "@/lib/migration/zentro";
 
 // Resolution order mirrors getBaseUrl() in
 // /api/account/invitations/route.ts: NEXT_PUBLIC_SITE_URL first, then
@@ -62,6 +63,25 @@ export async function GET(request: Request) {
         data: { user },
       } = await supabase.auth.getUser();
       if (user) {
+        // Cuenta migrada (OAuth, reset o impersonación): cerrar la sesión
+        // que acaba de crear el exchange y mandar a Zentro. Lista vacía →
+        // null, y este bloque no corre.
+        const migration = await migrationInfoForUser(user.id, user.email);
+        if (migration) {
+          try {
+            const { error: signOutError } = await supabase.auth.signOut();
+            if (signOutError) {
+              console.error(
+                "[GET /auth/callback] migrated signOut failed:",
+                signOutError,
+              );
+            }
+          } catch (err) {
+            console.error("[GET /auth/callback] migrated signOut threw:", err);
+          }
+          return NextResponse.redirect(migration.zentroLoginUrl);
+        }
+
         const { data: profile } = await supabase
           .from("profiles")
           .select("user_id")
