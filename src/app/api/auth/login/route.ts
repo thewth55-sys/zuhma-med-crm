@@ -11,6 +11,7 @@ import { sendLogin2faEmail } from "@/lib/email/login-2fa-email";
 import { parseBrowser, parseDevice } from "@/lib/auth/parse-user-agent";
 import { lookupCountry } from "@/lib/auth/geo-ip";
 import { checkRateLimit, rateLimitResponse, RATE_LIMITS, getClientIp } from "@/lib/rate-limit";
+import { migrationInfoForUser } from "@/lib/migration/zentro";
 
 /**
  * Server-side Turnstile verification. Skips (returns true) when
@@ -129,6 +130,34 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: signInError?.message || "Invalid credentials" }, { status: 401 });
   }
   const { session, user } = signIn;
+
+  // Cuentas ya mudadas a Zentro Med: no crear sesión ni mandar el 2FA.
+  // Sin MIGRATED_ACCOUNT_IDS, migrationInfoForUser retorna null (no-op).
+  const migration = await migrationInfoForUser(user.id, user.email ?? email);
+  if (migration) {
+    if (session.access_token) {
+      try {
+        const { error: signOutError } = await supabaseAdmin().auth.admin.signOut(
+          session.access_token,
+          "local",
+        );
+        if (signOutError) {
+          console.error("[auth/login] migrated session signOut failed:", signOutError);
+        }
+      } catch (err) {
+        console.error("[auth/login] migrated session signOut threw:", err);
+      }
+    }
+    return NextResponse.json(
+      {
+        migrated: true,
+        blocked: migration.blocked,
+        zentroLoginUrl: migration.zentroLoginUrl,
+        zentroAppUrl: migration.zentroAppUrl,
+      },
+      { status: migration.blocked ? 403 : 200 },
+    );
+  }
 
   // ¿Dispositivo de confianza? (salta el 2FA)
   const cookieStore = await cookies();

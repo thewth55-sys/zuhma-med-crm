@@ -7,6 +7,7 @@ import { Capacitor } from "@capacitor/core";
 import { createClient } from "@/lib/supabase/client";
 import { loadNativeSession, clearNativeSession } from "@/lib/native-session";
 import { AndroidAppBanner } from "@/components/android-app-banner";
+import { ZentroMigrationNotice } from "@/components/migration/zentro-migration-notice";
 import { Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { TurnstileWidget } from "@/components/auth/turnstile-widget";
@@ -69,6 +70,10 @@ function LoginPageInner() {
   // Login con Google (solo web — Google bloquea OAuth en WebView).
   const [googleLoading, setGoogleLoading] = useState(false);
   const googleAvailable = !Capacitor.isNativePlatform();
+  const [migrationNotice, setMigrationNotice] = useState<{
+    zentroLoginUrl: string;
+    zentroAppUrl: string | null;
+  } | null>(null);
 
   const handleGoogleLogin = async () => {
     setError(null);
@@ -142,6 +147,21 @@ function LoginPageInner() {
     });
     const data = await res.json().catch(() => ({}));
 
+    // Antes de !res.ok: una cuenta bloqueada responde 403 con el mismo
+    // cuerpo `migrated`, y igual hay que mostrar el aviso.
+    if (data?.migrated === true && typeof data.zentroLoginUrl === "string") {
+      await clearNativeSession();
+      setMigrationNotice({
+        zentroLoginUrl: data.zentroLoginUrl,
+        zentroAppUrl:
+          typeof data.zentroAppUrl === "string" && data.zentroAppUrl
+            ? data.zentroAppUrl
+            : null,
+      });
+      setLoading(false);
+      return;
+    }
+
     if (!res.ok) {
       setError(data.error || "Login failed");
       setLoading(false);
@@ -192,6 +212,16 @@ function LoginPageInner() {
       ? `/join/${encodeURIComponent(inviteToken)}`
       : "/dashboard";
   };
+
+  if (migrationNotice) {
+    return (
+      <ZentroMigrationNotice
+        zentroLoginUrl={migrationNotice.zentroLoginUrl}
+        zentroAppUrl={migrationNotice.zentroAppUrl}
+        autoRedirectSeconds={10}
+      />
+    );
+  }
 
   if (restoring) {
     return (
